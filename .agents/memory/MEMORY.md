@@ -2,3 +2,4 @@
 - [Telegram identifikatsiyasi](telegram-identity.md) — Telegram hisobini Google/email hisobi bilan tasdiqlanmagan ma’lumot orqali birlashtirmang.
 - [Preview muhiti](preview-quirks.md) — Eski Vite jarayoni portni band qilishi yoki optimallashtirilgan React keshi yangilanmay qolishi mumkin.
 - [SEO va nashr](seo-publication.md) — Shaxsiy domen shart emas; Google renderi uchun ommaviy API ma’lumotlarini yalpi bloklamang.
+- [Dependency xavfsizligi](dependency-security.md) — Tuzatilgan relizi yo‘q tranzitiv paketlarni qayta kiritishdan oldin ularning zarurligini tekshiring.
