@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CourseDeliveryMode } from './courseDeliveryMode';
+import type { CoursePriceType } from './coursePriceType';
 import type { CourseStatus } from './courseStatus';
 import type { TeacherSummary } from './teacherSummary';
 
@@ -24,10 +25,23 @@ export interface Course {
      * @nullable
      */
   originalPriceUzs: number | null;
+  priceType: CoursePriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent: number | null;
+  /** @nullable */
+  resourceUrl: string | null;
   /** @nullable */
   imageUrl: string | null;
-  startDate: Date;
-  endDate: Date;
+  /** @nullable */
+  videoUrl: string | null;
+  /** @nullable */
+  startDate: Date | null;
+  /** @nullable */
+  endDate: Date | null;
   listingExpiresAt: Date;
   status: CourseStatus;
   featured: boolean;

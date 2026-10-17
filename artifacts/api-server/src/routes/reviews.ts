@@ -4,7 +4,7 @@ import {
   ListCourseReviewsParams, ListCourseReviewsResponse,
   CreateCourseReviewParams, CreateCourseReviewBody, CreateCourseReviewResponse,
 } from "@workspace/api-zod";
-import { camel, findCourse, hashToken, HttpError, newId, throttle } from "../lib/edutop";
+import { camel, findCourse, hashToken, HttpError, newId, throttle, optionalUserId } from "../lib/edutop";
 
 const router: IRouter = Router();
 router.get("/courses/:courseId/reviews", async (req, res): Promise<void> => {
@@ -21,6 +21,7 @@ router.post("/courses/:courseId/reviews", async (req, res): Promise<void> => {
   const course = await findCourse(courseId);
   const owner = await pool.query("SELECT clerk_id FROM teachers WHERE id=$1", [course.teacher.id]);
   if (!owner.rows[0]?.clerk_id) throw new HttpError(409, "O‘qituvchi hisobi faol emas / Аккаунт преподавателя неактивен");
+  if (optionalUserId(req) === owner.rows[0].clerk_id) throw new HttpError(403, "O‘z kursingizni baholay olmaysiz / Нельзя оценивать собственный курс");
   const { rows } = await pool.query(`INSERT INTO reviews(id,course_id,teacher_id,reviewer_name,stars,comment,visitor_hash)
     VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(course_id,visitor_hash) DO NOTHING
     RETURNING id,reviewer_name,stars,comment,created_at`,

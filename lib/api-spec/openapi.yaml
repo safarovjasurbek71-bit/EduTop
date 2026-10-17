@@ -593,7 +593,7 @@ components:
         verified: { type: boolean }
     Certificate:
       type: object
-      required: [titleUz, titleRu]
+      required: [titleUz]
       properties:
         titleUz: { type: string }
         titleRu: { type: string }
@@ -640,17 +640,11 @@ components:
       type: object
       required:
         - fullNameUz
-        - fullNameRu
-        - specializationUz
-        - specializationRu
-        - bioUz
-        - bioRu
-        - experienceYears
       properties:
         fullNameUz: { type: string, minLength: 2, maxLength: 120 }
-        fullNameRu: { type: string, minLength: 2, maxLength: 120 }
-        specializationUz: { type: string, minLength: 2, maxLength: 120 }
-        specializationRu: { type: string, minLength: 2, maxLength: 120 }
+        fullNameRu: { type: string, maxLength: 120 }
+        specializationUz: { type: string, maxLength: 120 }
+        specializationRu: { type: string, maxLength: 120 }
         bioUz: { type: string, maxLength: 4000 }
         bioRu: { type: string, maxLength: 4000 }
         avatarUrl: { type: ["string", "null"], maxLength: 2000 }
@@ -676,7 +670,11 @@ components:
         - deliveryMode
         - priceUzs
         - originalPriceUzs
+        - priceType
+        - discountPercent
+        - resourceUrl
         - imageUrl
+        - videoUrl
         - startDate
         - endDate
         - listingExpiresAt
@@ -699,9 +697,13 @@ components:
         deliveryMode: { type: string, enum: [online, offline, hybrid] }
         priceUzs: { type: integer, minimum: 0 }
         originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        priceType: { type: string, enum: [free, paid, discounted] }
+        discountPercent: { type: ["integer", "null"], minimum: 1, maximum: 100 }
+        resourceUrl: { type: ["string", "null"] }
         imageUrl: { type: ["string", "null"] }
-        startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
+        videoUrl: { type: ["string", "null"] }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
         listingExpiresAt: { type: string, format: date-time }
         status: { type: string, enum: [draft, published, expired] }
         featured: { type: boolean }
@@ -728,28 +730,24 @@ components:
       type: object
       required:
         - titleUz
-        - titleRu
-        - descriptionUz
-        - descriptionRu
         - categoryId
-        - deliveryMode
-        - priceUzs
-        - startDate
-        - endDate
-        - listingExpiresAt
       properties:
         titleUz: { type: string, minLength: 3, maxLength: 180 }
-        titleRu: { type: string, minLength: 3, maxLength: 180 }
-        descriptionUz: { type: string, minLength: 10, maxLength: 8000 }
-        descriptionRu: { type: string, minLength: 10, maxLength: 8000 }
+        titleRu: { type: string, maxLength: 180 }
+        descriptionUz: { type: string, maxLength: 8000 }
+        descriptionRu: { type: string, maxLength: 8000 }
         categoryId: { type: string }
         deliveryMode: { type: string, enum: [online, offline, hybrid] }
         priceUzs: { type: integer, minimum: 0 }
         originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        priceType: { type: string, enum: [free, paid, discounted] }
+        discountPercent: { type: ["integer", "null"], minimum: 1, maximum: 100 }
+        resourceUrl: { type: ["string", "null"], maxLength: 2000 }
         imageUrl: { type: ["string", "null"], maxLength: 2000 }
-        startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
-        listingExpiresAt: { type: string, format: date-time }
+        videoUrl: { type: ["string", "null"], maxLength: 2000 }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+        listingExpiresAt: { type: ["string", "null"], format: date-time }
         featured: { type: boolean, default: false }
         cityUz: { type: ["string", "null"], maxLength: 120 }
         cityRu: { type: ["string", "null"], maxLength: 120 }
@@ -761,17 +759,21 @@ components:
       type: object
       properties:
         titleUz: { type: string, minLength: 3, maxLength: 180 }
-        titleRu: { type: string, minLength: 3, maxLength: 180 }
-        descriptionUz: { type: string, minLength: 10, maxLength: 8000 }
-        descriptionRu: { type: string, minLength: 10, maxLength: 8000 }
+        titleRu: { type: string, maxLength: 180 }
+        descriptionUz: { type: string, maxLength: 8000 }
+        descriptionRu: { type: string, maxLength: 8000 }
         categoryId: { type: string }
         deliveryMode: { type: string, enum: [online, offline, hybrid] }
         priceUzs: { type: integer, minimum: 0 }
         originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        priceType: { type: string, enum: [free, paid, discounted] }
+        discountPercent: { type: ["integer", "null"], minimum: 1, maximum: 100 }
+        resourceUrl: { type: ["string", "null"], maxLength: 2000 }
         imageUrl: { type: ["string", "null"], maxLength: 2000 }
-        startDate: { type: string, format: date }
-        endDate: { type: string, format: date }
-        listingExpiresAt: { type: string, format: date-time }
+        videoUrl: { type: ["string", "null"], maxLength: 2000 }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+        listingExpiresAt: { type: ["string", "null"], format: date-time }
         featured: { type: boolean }
         cityUz: { type: ["string", "null"], maxLength: 120 }
         cityRu: { type: ["string", "null"], maxLength: 120 }
@@ -862,8 +864,8 @@ components:
       required: [name, size, contentType]
       properties:
         name: { type: string, minLength: 1, maxLength: 255 }
-        size: { type: integer, minimum: 1, maximum: 10485760 }
-        contentType: { type: string, enum: [image/jpeg, image/png, image/webp] }
+        size: { type: integer, minimum: 1, maximum: 52428800, description: "Images up to 10 MB; MP4/WebM videos up to 50 MB." }
+        contentType: { type: string, enum: [image/jpeg, image/png, image/webp, video/mp4, video/webm] }
     UploadResponse:
       type: object
       required: [uploadURL, objectPath]

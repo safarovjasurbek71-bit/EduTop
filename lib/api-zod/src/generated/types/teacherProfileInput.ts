@@ -13,25 +13,16 @@ export interface TeacherProfileInput {
      * @maxLength 120
      */
   fullNameUz: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  fullNameRu: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  specializationUz: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  specializationRu: string;
+  /** @maxLength 120 */
+  fullNameRu?: string;
+  /** @maxLength 120 */
+  specializationUz?: string;
+  /** @maxLength 120 */
+  specializationRu?: string;
   /** @maxLength 4000 */
-  bioUz: string;
+  bioUz?: string;
   /** @maxLength 4000 */
-  bioRu: string;
+  bioRu?: string;
   /**
      * @maxLength 2000
      * @nullable
@@ -41,7 +32,7 @@ export interface TeacherProfileInput {
      * @minimum 0
      * @maximum 70
      */
-  experienceYears: number;
+  experienceYears?: number;
   certificates?: Certificate[];
   /**
      * @maxLength 40

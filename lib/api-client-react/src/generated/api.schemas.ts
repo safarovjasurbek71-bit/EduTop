@@ -44,7 +44,7 @@ export interface TeacherSummary {
 
 export interface Certificate {
   titleUz: string;
-  titleRu: string;
+  titleRu?: string;
   /** @nullable */
   issuer?: string | null;
   /** @nullable */
@@ -86,25 +86,16 @@ export interface TeacherProfileInput {
      * @maxLength 120
      */
   fullNameUz: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  fullNameRu: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  specializationUz: string;
-  /**
-     * @minLength 2
-     * @maxLength 120
-     */
-  specializationRu: string;
+  /** @maxLength 120 */
+  fullNameRu?: string;
+  /** @maxLength 120 */
+  specializationUz?: string;
+  /** @maxLength 120 */
+  specializationRu?: string;
   /** @maxLength 4000 */
-  bioUz: string;
+  bioUz?: string;
   /** @maxLength 4000 */
-  bioRu: string;
+  bioRu?: string;
   /**
      * @maxLength 2000
      * @nullable
@@ -114,7 +105,7 @@ export interface TeacherProfileInput {
      * @minimum 0
      * @maximum 70
      */
-  experienceYears: number;
+  experienceYears?: number;
   certificates?: Certificate[];
   /**
      * @maxLength 40
@@ -157,6 +148,15 @@ export const CourseDeliveryMode = {
   hybrid: 'hybrid',
 } as const;
 
+export type CoursePriceType = typeof CoursePriceType[keyof typeof CoursePriceType];
+
+
+export const CoursePriceType = {
+  free: 'free',
+  paid: 'paid',
+  discounted: 'discounted',
+} as const;
+
 export type CourseStatus = typeof CourseStatus[keyof typeof CourseStatus];
 
 
@@ -181,10 +181,23 @@ export interface Course {
      * @nullable
      */
   originalPriceUzs: number | null;
+  priceType: CoursePriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent: number | null;
+  /** @nullable */
+  resourceUrl: string | null;
   /** @nullable */
   imageUrl: string | null;
-  startDate: string;
-  endDate: string;
+  /** @nullable */
+  videoUrl: string | null;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
   listingExpiresAt: string;
   status: CourseStatus;
   featured: boolean;
@@ -220,6 +233,15 @@ export const CourseInputDeliveryMode = {
   hybrid: 'hybrid',
 } as const;
 
+export type CourseInputPriceType = typeof CourseInputPriceType[keyof typeof CourseInputPriceType];
+
+
+export const CourseInputPriceType = {
+  free: 'free',
+  paid: 'paid',
+  discounted: 'discounted',
+} as const;
+
 export type CourseInputStatus = typeof CourseInputStatus[keyof typeof CourseInputStatus];
 
 
@@ -234,38 +256,49 @@ export interface CourseInput {
      * @maxLength 180
      */
   titleUz: string;
-  /**
-     * @minLength 3
-     * @maxLength 180
-     */
-  titleRu: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
-  descriptionUz: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
-  descriptionRu: string;
+  /** @maxLength 180 */
+  titleRu?: string;
+  /** @maxLength 8000 */
+  descriptionUz?: string;
+  /** @maxLength 8000 */
+  descriptionRu?: string;
   categoryId: string;
-  deliveryMode: CourseInputDeliveryMode;
+  deliveryMode?: CourseInputDeliveryMode;
   /** @minimum 0 */
-  priceUzs: number;
+  priceUzs?: number;
   /**
      * @minimum 0
      * @nullable
      */
   originalPriceUzs?: number | null;
+  priceType?: CourseInputPriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent?: number | null;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  resourceUrl?: string | null;
   /**
      * @maxLength 2000
      * @nullable
      */
   imageUrl?: string | null;
-  startDate: string;
-  endDate: string;
-  listingExpiresAt: string;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  videoUrl?: string | null;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  /** @nullable */
+  listingExpiresAt?: string | null;
   featured?: boolean;
   /**
      * @maxLength 120
@@ -304,6 +337,15 @@ export const CourseUpdateDeliveryMode = {
   hybrid: 'hybrid',
 } as const;
 
+export type CourseUpdatePriceType = typeof CourseUpdatePriceType[keyof typeof CourseUpdatePriceType];
+
+
+export const CourseUpdatePriceType = {
+  free: 'free',
+  paid: 'paid',
+  discounted: 'discounted',
+} as const;
+
 export type CourseUpdateStatus = typeof CourseUpdateStatus[keyof typeof CourseUpdateStatus];
 
 
@@ -318,20 +360,11 @@ export interface CourseUpdate {
      * @maxLength 180
      */
   titleUz?: string;
-  /**
-     * @minLength 3
-     * @maxLength 180
-     */
+  /** @maxLength 180 */
   titleRu?: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
+  /** @maxLength 8000 */
   descriptionUz?: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
+  /** @maxLength 8000 */
   descriptionRu?: string;
   categoryId?: string;
   deliveryMode?: CourseUpdateDeliveryMode;
@@ -342,14 +375,34 @@ export interface CourseUpdate {
      * @nullable
      */
   originalPriceUzs?: number | null;
+  priceType?: CourseUpdatePriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent?: number | null;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  resourceUrl?: string | null;
   /**
      * @maxLength 2000
      * @nullable
      */
   imageUrl?: string | null;
-  startDate?: string;
-  endDate?: string;
-  listingExpiresAt?: string;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  videoUrl?: string | null;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  /** @nullable */
+  listingExpiresAt?: string | null;
   featured?: boolean;
   /**
      * @maxLength 120
@@ -485,6 +538,8 @@ export const UploadRequestContentType = {
   'image/jpeg': 'image/jpeg',
   'image/png': 'image/png',
   'image/webp': 'image/webp',
+  'video/mp4': 'video/mp4',
+  'video/webm': 'video/webm',
 } as const;
 
 export interface UploadRequest {
@@ -494,8 +549,9 @@ export interface UploadRequest {
      */
   name: string;
   /**
+     * Images up to 10 MB; MP4/WebM videos up to 50 MB.
      * @minimum 1
-     * @maximum 10485760
+     * @maximum 52428800
      */
   size: number;
   contentType: UploadRequestContentType;

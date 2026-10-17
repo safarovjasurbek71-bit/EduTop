@@ -3,6 +3,7 @@ import { useClerk, useUser } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetAppSessionQueryKey, useGetAppSession, useLogoutAppSession } from "@workspace/api-client-react";
 import { Send } from "lucide-react";
+import { type Lang, tr, getLang } from "@/i18n";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 type AppAuth = {
@@ -41,8 +42,8 @@ export function AppAuthProvider({ children }: { children: ReactNode }) {
     telegramConfigured: Boolean(session.data?.telegramConfigured), logout,
   }}>
     {session.isError && !isSignedIn && <div className="auth-service-warning" role="alert">
-      Hisobni tekshirib bo‘lmadi / Не удалось проверить сеанс.
-      <button onClick={() => session.refetch()}>Qayta urinish / Повторить</button>
+      {tr("Hisobni tekshirib bo‘lmadi.", "Не удалось проверить сеанс.", getLang())}
+      <button onClick={() => session.refetch()}>{tr("Qayta urinish", "Повторить", getLang())}</button>
     </div>}
     {children}
   </AuthContext.Provider>;
@@ -60,38 +61,38 @@ export function AuthVisibility({ when, children }: { when: "signed-in" | "signed
   return <>{children}</>;
 }
 
-export function TelegramLoginButton({ lang }: { lang: "uz" | "ru" }) {
+export function TelegramLoginButton({ lang }: { lang: Lang }) {
   const { telegramConfigured, loading } = useAppAuth();
   const error = new URLSearchParams(window.location.search).get("telegram_error");
-  const messages: Record<string, [string, string]> = {
-    invalid_state: ["Kirish havolasi eskirgan. Telegram orqali qayta kiring.", "Ссылка входа устарела. Повторите вход через Telegram."],
-    cancelled: ["Telegram orqali kirish bekor qilindi.", "Вход через Telegram отменён."],
-    configuration: ["Telegram Login sozlamalari to‘liq emas.", "Telegram Login ещё не настроен."],
-    provider: ["Telegram kirishni tasdiqlamadi. Qayta urinib ko‘ring.", "Telegram не подтвердил вход. Попробуйте снова."],
-    verification: ["Telegram javobini tekshirib bo‘lmadi. Qayta urinib ko‘ring.", "Не удалось проверить ответ Telegram. Попробуйте снова."],
+  const messages: Record<string, [string, string, string]> = {
+    invalid_state: ["Kirish havolasi eskirgan. Telegram orqali qayta kiring.", "Ссылка входа устарела. Повторите вход через Telegram.", "Sign-in link expired. Please sign in with Telegram again."],
+    cancelled: ["Telegram orqali kirish bekor qilindi.", "Вход через Telegram отменён.", "Telegram sign-in was cancelled."],
+    configuration: ["Telegram Login sozlamalari to‘liq emas.", "Telegram Login ещё не настроен.", "Telegram Login is not configured yet."],
+    provider: ["Telegram kirishni tasdiqlamadi. Qayta urinib ko‘ring.", "Telegram не подтвердил вход. Попробуйте снова.", "Telegram did not confirm the sign-in. Please try again."],
+    verification: ["Telegram javobini tekshirib bo‘lmadi. Qayta urinib ko‘ring.", "Не удалось проверить ответ Telegram. Попробуйте снова.", "Could not verify the Telegram response. Please try again."],
   };
   return <div className="telegram-login-block">
     {telegramConfigured ? <a className="button telegram-login-button" href={`${basePath}/api/auth/telegram/start`} data-testid="button-telegram-login">
-      <Send size={19}/>{lang === "uz" ? "Telegram orqali kirish" : "Войти через Telegram"}
+      <Send size={19}/>{tr("Telegram orqali kirish", "Войти через Telegram", lang)}
     </a> : <button className="button telegram-login-button" disabled>
-      <Send size={19}/>{loading ? (lang === "uz" ? "Tekshirilmoqda…" : "Проверка…") : (lang === "uz" ? "Telegram Login hali sozlanmagan" : "Telegram Login ещё не настроен")}
+      <Send size={19}/>{loading ? tr("Tekshirilmoqda…", "Проверка…", lang) : (tr("Telegram Login hali sozlanmagan", "Telegram Login ещё не настроен", lang))}
     </button>}
-    {error && <p className="form-error" role="alert">{(messages[error] ?? messages.verification)[lang === "uz" ? 0 : 1]}</p>}
+    {error && <p className="form-error" role="alert">{(messages[error] ?? messages.verification)[lang === "uz" ? 0 : lang === "ru" ? 1 : 2]}</p>}
   </div>;
 }
 
-export function AppLogoutButton({ lang }: { lang: "uz" | "ru" }) {
+export function AppLogoutButton({ lang }: { lang: Lang }) {
   const { logout } = useAppAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function leave() {
     setBusy(true); setError("");
     try { await logout(); } catch {
-      setError(lang === "uz" ? "Chiqib bo‘lmadi. Qayta urinib ko‘ring." : "Не удалось выйти. Попробуйте снова.");
+      setError(tr("Chiqib bo‘lmadi. Qayta urinib ko‘ring.", "Не удалось выйти. Попробуйте снова.", lang));
       setBusy(false);
     }
   }
   return <div><button className="button button-outline" disabled={busy} onClick={() => void leave()} data-testid="button-sign-out">
-    {busy ? "…" : lang === "uz" ? "Chiqish" : "Выйти"}
+    {busy ? "…" : tr("Chiqish", "Выйти", lang)}
   </button>{error && <p className="form-error" role="alert">{error}</p>}</div>;
 }

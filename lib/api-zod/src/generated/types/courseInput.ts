@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CourseInputDeliveryMode } from './courseInputDeliveryMode';
+import type { CourseInputPriceType } from './courseInputPriceType';
 import type { CourseInputStatus } from './courseInputStatus';
 
 export interface CourseInput {
@@ -14,38 +15,49 @@ export interface CourseInput {
      * @maxLength 180
      */
   titleUz: string;
-  /**
-     * @minLength 3
-     * @maxLength 180
-     */
-  titleRu: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
-  descriptionUz: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
-  descriptionRu: string;
+  /** @maxLength 180 */
+  titleRu?: string;
+  /** @maxLength 8000 */
+  descriptionUz?: string;
+  /** @maxLength 8000 */
+  descriptionRu?: string;
   categoryId: string;
-  deliveryMode: CourseInputDeliveryMode;
+  deliveryMode?: CourseInputDeliveryMode;
   /** @minimum 0 */
-  priceUzs: number;
+  priceUzs?: number;
   /**
      * @minimum 0
      * @nullable
      */
   originalPriceUzs?: number | null;
+  priceType?: CourseInputPriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent?: number | null;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  resourceUrl?: string | null;
   /**
      * @maxLength 2000
      * @nullable
      */
   imageUrl?: string | null;
-  startDate: Date;
-  endDate: Date;
-  listingExpiresAt: Date;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  videoUrl?: string | null;
+  /** @nullable */
+  startDate?: Date | null;
+  /** @nullable */
+  endDate?: Date | null;
+  /** @nullable */
+  listingExpiresAt?: Date | null;
   featured?: boolean;
   /**
      * @maxLength 120

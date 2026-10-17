@@ -6,7 +6,7 @@ import {
 import { Router, type IRouter, type Request, type Response } from 'express';
 
 import { pool } from '@workspace/db';
-import { throttle, optionalUserId, userId } from '../lib/edutop';
+import { throttle, optionalUserId, userId, HttpError } from '../lib/edutop';
 import {
   ObjectNotFoundError,
   ObjectStorageService,
@@ -44,7 +44,12 @@ router.post(
 
     try {
       const { name, size, contentType } = parsed.data;
-      await throttle(req, 'image-upload', 50, 60);
+      const maxSize = contentType.startsWith('video/') ? 52428800 : 10485760;
+      if (size > maxSize) {
+        res.status(400).json({ error: contentType.startsWith('video/') ? 'Video must be 50 MB or smaller' : 'Image must be 10 MB or smaller' });
+        return;
+      }
+      await throttle(req, 'media-upload', 50, 60);
 
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       const objectPath =
@@ -62,6 +67,10 @@ router.post(
         }),
       );
     } catch (error) {
+      if (error instanceof HttpError) {
+        res.status(error.status).json({ error: error.message });
+        return;
+      }
       req.log.error({ err: error }, 'Error generating upload URL');
       res.status(500).json({ error: 'Failed to generate upload URL' });
     }
@@ -142,13 +151,14 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
     //   return;
     // }
 
-    const response = await objectStorageService.downloadObject(objectFile);
+    const response = await objectStorageService.downloadObject(objectFile, 3600, req.headers.range);
 
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
     res.setHeader('Content-Type', uploaded.rows[0].content_type);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    if (req.method === 'HEAD') { await response.body?.cancel(); res.end(); return; }
 
     if (response.body) {
       const nodeStream = Readable.fromWeb(

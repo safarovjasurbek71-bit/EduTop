@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CourseUpdateDeliveryMode } from './courseUpdateDeliveryMode';
+import type { CourseUpdatePriceType } from './courseUpdatePriceType';
 import type { CourseUpdateStatus } from './courseUpdateStatus';
 
 export interface CourseUpdate {
@@ -14,20 +15,11 @@ export interface CourseUpdate {
      * @maxLength 180
      */
   titleUz?: string;
-  /**
-     * @minLength 3
-     * @maxLength 180
-     */
+  /** @maxLength 180 */
   titleRu?: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
+  /** @maxLength 8000 */
   descriptionUz?: string;
-  /**
-     * @minLength 10
-     * @maxLength 8000
-     */
+  /** @maxLength 8000 */
   descriptionRu?: string;
   categoryId?: string;
   deliveryMode?: CourseUpdateDeliveryMode;
@@ -38,14 +30,34 @@ export interface CourseUpdate {
      * @nullable
      */
   originalPriceUzs?: number | null;
+  priceType?: CourseUpdatePriceType;
+  /**
+     * @minimum 1
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent?: number | null;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  resourceUrl?: string | null;
   /**
      * @maxLength 2000
      * @nullable
      */
   imageUrl?: string | null;
-  startDate?: Date;
-  endDate?: Date;
-  listingExpiresAt?: Date;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  videoUrl?: string | null;
+  /** @nullable */
+  startDate?: Date | null;
+  /** @nullable */
+  endDate?: Date | null;
+  /** @nullable */
+  listingExpiresAt?: Date | null;
   featured?: boolean;
   /**
      * @maxLength 120

@@ -98,6 +98,8 @@ export const listCoursesResponseItemsItemPriceUzsMin = 0;
 
 export const listCoursesResponseItemsItemOriginalPriceUzsMin = 0;
 
+export const listCoursesResponseItemsItemDiscountPercentMax = 100;
+
 
 
 export const ListCoursesResponse = zod.object({
@@ -111,9 +113,13 @@ export const ListCoursesResponse = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(listCoursesResponseItemsItemPriceUzsMin),
   "originalPriceUzs": zod.number().int().min(listCoursesResponseItemsItemOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(listCoursesResponseItemsItemDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -149,20 +155,23 @@ export const ListCoursesResponse = zod.object({
 export const createCourseBodyTitleUzMin = 3;
 export const createCourseBodyTitleUzMax = 180;
 
-export const createCourseBodyTitleRuMin = 3;
 export const createCourseBodyTitleRuMax = 180;
 
-export const createCourseBodyDescriptionUzMin = 10;
 export const createCourseBodyDescriptionUzMax = 8000;
 
-export const createCourseBodyDescriptionRuMin = 10;
 export const createCourseBodyDescriptionRuMax = 8000;
 
 export const createCourseBodyPriceUzsMin = 0;
 
 export const createCourseBodyOriginalPriceUzsMin = 0;
 
+export const createCourseBodyDiscountPercentMax = 100;
+
+export const createCourseBodyResourceUrlMax = 2000;
+
 export const createCourseBodyImageUrlMax = 2000;
+
+export const createCourseBodyVideoUrlMax = 2000;
 
 export const createCourseBodyFeaturedDefault = false;
 export const createCourseBodyCityUzMax = 120;
@@ -179,17 +188,21 @@ export const createCourseBodyPaymentUrlMax = 2000;
 
 export const CreateCourseBody = zod.object({
   "titleUz": zod.string().min(createCourseBodyTitleUzMin).max(createCourseBodyTitleUzMax),
-  "titleRu": zod.string().min(createCourseBodyTitleRuMin).max(createCourseBodyTitleRuMax),
-  "descriptionUz": zod.string().min(createCourseBodyDescriptionUzMin).max(createCourseBodyDescriptionUzMax),
-  "descriptionRu": zod.string().min(createCourseBodyDescriptionRuMin).max(createCourseBodyDescriptionRuMax),
+  "titleRu": zod.string().max(createCourseBodyTitleRuMax).optional(),
+  "descriptionUz": zod.string().max(createCourseBodyDescriptionUzMax).optional(),
+  "descriptionRu": zod.string().max(createCourseBodyDescriptionRuMax).optional(),
   "categoryId": zod.string(),
-  "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
-  "priceUzs": zod.number().int().min(createCourseBodyPriceUzsMin),
+  "deliveryMode": zod.enum(['online', 'offline', 'hybrid']).optional(),
+  "priceUzs": zod.number().int().min(createCourseBodyPriceUzsMin).optional(),
   "originalPriceUzs": zod.number().int().min(createCourseBodyOriginalPriceUzsMin).nullish(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']).optional(),
+  "discountPercent": zod.number().int().min(1).max(createCourseBodyDiscountPercentMax).nullish(),
+  "resourceUrl": zod.string().max(createCourseBodyResourceUrlMax).nullish(),
   "imageUrl": zod.string().max(createCourseBodyImageUrlMax).nullish(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
-  "listingExpiresAt": zod.coerce.date(),
+  "videoUrl": zod.string().max(createCourseBodyVideoUrlMax).nullish(),
+  "startDate": zod.coerce.date().nullish(),
+  "endDate": zod.coerce.date().nullish(),
+  "listingExpiresAt": zod.coerce.date().nullish(),
   "featured": zod.boolean().default(createCourseBodyFeaturedDefault),
   "cityUz": zod.string().max(createCourseBodyCityUzMax).nullish(),
   "cityRu": zod.string().max(createCourseBodyCityRuMax).nullish(),
@@ -203,6 +216,8 @@ export const createCourseResponsePriceUzsMin = 0;
 
 export const createCourseResponseOriginalPriceUzsMin = 0;
 
+export const createCourseResponseDiscountPercentMax = 100;
+
 
 
 export const CreateCourseResponse = zod.object({
@@ -215,9 +230,13 @@ export const CreateCourseResponse = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(createCourseResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(createCourseResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(createCourseResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -250,6 +269,8 @@ export const listFeaturedCoursesResponsePriceUzsMin = 0;
 
 export const listFeaturedCoursesResponseOriginalPriceUzsMin = 0;
 
+export const listFeaturedCoursesResponseDiscountPercentMax = 100;
+
 
 
 export const ListFeaturedCoursesResponseItem = zod.object({
@@ -262,9 +283,13 @@ export const ListFeaturedCoursesResponseItem = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(listFeaturedCoursesResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(listFeaturedCoursesResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(listFeaturedCoursesResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -302,6 +327,8 @@ export const getCourseResponsePriceUzsMin = 0;
 
 export const getCourseResponseOriginalPriceUzsMin = 0;
 
+export const getCourseResponseDiscountPercentMax = 100;
+
 
 
 export const GetCourseResponse = zod.object({
@@ -314,9 +341,13 @@ export const GetCourseResponse = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(getCourseResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(getCourseResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(getCourseResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -352,20 +383,23 @@ export const UpdateCourseParams = zod.object({
 export const updateCourseBodyTitleUzMin = 3;
 export const updateCourseBodyTitleUzMax = 180;
 
-export const updateCourseBodyTitleRuMin = 3;
 export const updateCourseBodyTitleRuMax = 180;
 
-export const updateCourseBodyDescriptionUzMin = 10;
 export const updateCourseBodyDescriptionUzMax = 8000;
 
-export const updateCourseBodyDescriptionRuMin = 10;
 export const updateCourseBodyDescriptionRuMax = 8000;
 
 export const updateCourseBodyPriceUzsMin = 0;
 
 export const updateCourseBodyOriginalPriceUzsMin = 0;
 
+export const updateCourseBodyDiscountPercentMax = 100;
+
+export const updateCourseBodyResourceUrlMax = 2000;
+
 export const updateCourseBodyImageUrlMax = 2000;
+
+export const updateCourseBodyVideoUrlMax = 2000;
 
 export const updateCourseBodyCityUzMax = 120;
 
@@ -381,17 +415,21 @@ export const updateCourseBodyPaymentUrlMax = 2000;
 
 export const UpdateCourseBody = zod.object({
   "titleUz": zod.string().min(updateCourseBodyTitleUzMin).max(updateCourseBodyTitleUzMax).optional(),
-  "titleRu": zod.string().min(updateCourseBodyTitleRuMin).max(updateCourseBodyTitleRuMax).optional(),
-  "descriptionUz": zod.string().min(updateCourseBodyDescriptionUzMin).max(updateCourseBodyDescriptionUzMax).optional(),
-  "descriptionRu": zod.string().min(updateCourseBodyDescriptionRuMin).max(updateCourseBodyDescriptionRuMax).optional(),
+  "titleRu": zod.string().max(updateCourseBodyTitleRuMax).optional(),
+  "descriptionUz": zod.string().max(updateCourseBodyDescriptionUzMax).optional(),
+  "descriptionRu": zod.string().max(updateCourseBodyDescriptionRuMax).optional(),
   "categoryId": zod.string().optional(),
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']).optional(),
   "priceUzs": zod.number().int().min(updateCourseBodyPriceUzsMin).optional(),
   "originalPriceUzs": zod.number().int().min(updateCourseBodyOriginalPriceUzsMin).nullish(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']).optional(),
+  "discountPercent": zod.number().int().min(1).max(updateCourseBodyDiscountPercentMax).nullish(),
+  "resourceUrl": zod.string().max(updateCourseBodyResourceUrlMax).nullish(),
   "imageUrl": zod.string().max(updateCourseBodyImageUrlMax).nullish(),
-  "startDate": zod.coerce.date().optional(),
-  "endDate": zod.coerce.date().optional(),
-  "listingExpiresAt": zod.coerce.date().optional(),
+  "videoUrl": zod.string().max(updateCourseBodyVideoUrlMax).nullish(),
+  "startDate": zod.coerce.date().nullish(),
+  "endDate": zod.coerce.date().nullish(),
+  "listingExpiresAt": zod.coerce.date().nullish(),
   "featured": zod.boolean().optional(),
   "cityUz": zod.string().max(updateCourseBodyCityUzMax).nullish(),
   "cityRu": zod.string().max(updateCourseBodyCityRuMax).nullish(),
@@ -405,6 +443,8 @@ export const updateCourseResponsePriceUzsMin = 0;
 
 export const updateCourseResponseOriginalPriceUzsMin = 0;
 
+export const updateCourseResponseDiscountPercentMax = 100;
+
 
 
 export const UpdateCourseResponse = zod.object({
@@ -417,9 +457,13 @@ export const UpdateCourseResponse = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(updateCourseResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(updateCourseResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(updateCourseResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -474,7 +518,7 @@ export const GetTeacherResponse = zod.object({
   "experienceYears": zod.number().int(),
   "certificates": zod.array(zod.object({
   "titleUz": zod.string(),
-  "titleRu": zod.string(),
+  "titleRu": zod.string().optional(),
   "issuer": zod.string().nullish(),
   "imageUrl": zod.string().nullish()
 })),
@@ -501,6 +545,8 @@ export const listTeacherCoursesResponsePriceUzsMin = 0;
 
 export const listTeacherCoursesResponseOriginalPriceUzsMin = 0;
 
+export const listTeacherCoursesResponseDiscountPercentMax = 100;
+
 
 
 export const ListTeacherCoursesResponseItem = zod.object({
@@ -513,9 +559,13 @@ export const ListTeacherCoursesResponseItem = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(listTeacherCoursesResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(listTeacherCoursesResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(listTeacherCoursesResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -557,7 +607,7 @@ export const GetMyTeacherProfileResponse = zod.object({
   "experienceYears": zod.number().int(),
   "certificates": zod.array(zod.object({
   "titleUz": zod.string(),
-  "titleRu": zod.string(),
+  "titleRu": zod.string().optional(),
   "issuer": zod.string().nullish(),
   "imageUrl": zod.string().nullish()
 })),
@@ -579,13 +629,10 @@ export const GetMyTeacherProfileResponse = zod.object({
 export const saveMyTeacherProfileBodyFullNameUzMin = 2;
 export const saveMyTeacherProfileBodyFullNameUzMax = 120;
 
-export const saveMyTeacherProfileBodyFullNameRuMin = 2;
 export const saveMyTeacherProfileBodyFullNameRuMax = 120;
 
-export const saveMyTeacherProfileBodySpecializationUzMin = 2;
 export const saveMyTeacherProfileBodySpecializationUzMax = 120;
 
-export const saveMyTeacherProfileBodySpecializationRuMin = 2;
 export const saveMyTeacherProfileBodySpecializationRuMax = 120;
 
 export const saveMyTeacherProfileBodyBioUzMax = 4000;
@@ -613,16 +660,16 @@ export const saveMyTeacherProfileBodyCityRuMax = 120;
 
 export const SaveMyTeacherProfileBody = zod.object({
   "fullNameUz": zod.string().min(saveMyTeacherProfileBodyFullNameUzMin).max(saveMyTeacherProfileBodyFullNameUzMax),
-  "fullNameRu": zod.string().min(saveMyTeacherProfileBodyFullNameRuMin).max(saveMyTeacherProfileBodyFullNameRuMax),
-  "specializationUz": zod.string().min(saveMyTeacherProfileBodySpecializationUzMin).max(saveMyTeacherProfileBodySpecializationUzMax),
-  "specializationRu": zod.string().min(saveMyTeacherProfileBodySpecializationRuMin).max(saveMyTeacherProfileBodySpecializationRuMax),
-  "bioUz": zod.string().max(saveMyTeacherProfileBodyBioUzMax),
-  "bioRu": zod.string().max(saveMyTeacherProfileBodyBioRuMax),
+  "fullNameRu": zod.string().max(saveMyTeacherProfileBodyFullNameRuMax).optional(),
+  "specializationUz": zod.string().max(saveMyTeacherProfileBodySpecializationUzMax).optional(),
+  "specializationRu": zod.string().max(saveMyTeacherProfileBodySpecializationRuMax).optional(),
+  "bioUz": zod.string().max(saveMyTeacherProfileBodyBioUzMax).optional(),
+  "bioRu": zod.string().max(saveMyTeacherProfileBodyBioRuMax).optional(),
   "avatarUrl": zod.string().max(saveMyTeacherProfileBodyAvatarUrlMax).nullish(),
-  "experienceYears": zod.number().int().min(saveMyTeacherProfileBodyExperienceYearsMin).max(saveMyTeacherProfileBodyExperienceYearsMax),
+  "experienceYears": zod.number().int().min(saveMyTeacherProfileBodyExperienceYearsMin).max(saveMyTeacherProfileBodyExperienceYearsMax).optional(),
   "certificates": zod.array(zod.object({
   "titleUz": zod.string(),
-  "titleRu": zod.string(),
+  "titleRu": zod.string().optional(),
   "issuer": zod.string().nullish(),
   "imageUrl": zod.string().nullish()
 })).optional(),
@@ -646,7 +693,7 @@ export const SaveMyTeacherProfileResponse = zod.object({
   "experienceYears": zod.number().int(),
   "certificates": zod.array(zod.object({
   "titleUz": zod.string(),
-  "titleRu": zod.string(),
+  "titleRu": zod.string().optional(),
   "issuer": zod.string().nullish(),
   "imageUrl": zod.string().nullish()
 })),
@@ -682,6 +729,8 @@ export const listMyCoursesResponsePriceUzsMin = 0;
 
 export const listMyCoursesResponseOriginalPriceUzsMin = 0;
 
+export const listMyCoursesResponseDiscountPercentMax = 100;
+
 
 
 export const ListMyCoursesResponseItem = zod.object({
@@ -694,9 +743,13 @@ export const ListMyCoursesResponseItem = zod.object({
   "deliveryMode": zod.enum(['online', 'offline', 'hybrid']),
   "priceUzs": zod.number().int().min(listMyCoursesResponsePriceUzsMin),
   "originalPriceUzs": zod.number().int().min(listMyCoursesResponseOriginalPriceUzsMin).nullable(),
+  "priceType": zod.enum(['free', 'paid', 'discounted']),
+  "discountPercent": zod.number().int().min(1).max(listMyCoursesResponseDiscountPercentMax).nullable(),
+  "resourceUrl": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
-  "startDate": zod.coerce.date(),
-  "endDate": zod.coerce.date(),
+  "videoUrl": zod.string().nullable(),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable(),
   "listingExpiresAt": zod.coerce.date(),
   "status": zod.enum(['draft', 'published', 'expired']),
   "featured": zod.boolean(),
@@ -924,14 +977,14 @@ export const CreateCourseReviewResponse = zod.object({
  */
 export const requestUploadUrlBodyNameMax = 255;
 
-export const requestUploadUrlBodySizeMax = 10485760;
+export const requestUploadUrlBodySizeMax = 52428800;
 
 
 
 export const RequestUploadUrlBody = zod.object({
   "name": zod.string().min(1).max(requestUploadUrlBodyNameMax),
-  "size": zod.number().int().min(1).max(requestUploadUrlBodySizeMax),
-  "contentType": zod.enum(['image/jpeg', 'image/png', 'image/webp'])
+  "size": zod.number().int().min(1).max(requestUploadUrlBodySizeMax).describe('Images up to 10 MB; MP4/WebM videos up to 50 MB.'),
+  "contentType": zod.enum(['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'])
 })
 
 export const RequestUploadUrlResponse = zod.object({

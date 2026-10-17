@@ -8,7 +8,7 @@
 
 export interface Certificate {
   titleUz: string;
-  titleRu: string;
+  titleRu?: string;
   /** @nullable */
   issuer?: string | null;
   /** @nullable */

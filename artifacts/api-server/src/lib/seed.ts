@@ -9,10 +9,16 @@ export async function seedTaxonomy() {
     ["science", "science", "Aniq fanlar", "Точные науки"],
     ["creative", "creative", "Ijod va san’at", "Творчество и искусство"],
     ["personal", "personal", "Shaxsiy rivojlanish", "Личное развитие"],
+    ["computer", "computer", "Kompyuter savodxonligi", "Компьютерная грамотность"],
+    ["ecommerce", "ecommerce", "Onlayn savdo va Uzum", "Онлайн-торговля и Uzum"],
+    ["professions", "professions", "Kasb-hunar", "Профессиональные навыки"],
+    ["beauty", "beauty", "Go‘zallik va parvarish", "Красота и уход"],
+    ["cooking", "cooking", "Pazandachilik", "Кулинария"],
+    ["finance", "finance", "Moliya va buxgalteriya", "Финансы и бухгалтерия"],
     ["other", "other", "Boshqa kurslar", "Другие курсы"],
   ];
   for (const [position, values] of categories.entries()) {
-    await pool.query("INSERT INTO categories(id,key,name_uz,name_ru,position) VALUES($1,$2,$3,$4,$5) ON CONFLICT(id) DO NOTHING", [...values, position]);
+    await pool.query("INSERT INTO categories(id,key,name_uz,name_ru,position) VALUES($1,$2,$3,$4,$5) ON CONFLICT(id) DO UPDATE SET name_uz=EXCLUDED.name_uz,name_ru=EXCLUDED.name_ru,position=EXCLUDED.position", [...values, position]);
   }
 }
 

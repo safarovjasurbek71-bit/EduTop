@@ -91,13 +91,11 @@ export class ObjectStorageService {
   async downloadObject(
     file: File,
     cacheTtlSec: number = 3600,
+    range?: string,
   ): Promise<Response> {
     const [metadata] = await file.getMetadata();
     const aclPolicy = await getObjectAclPolicy(file);
     const isPublic = aclPolicy?.visibility === 'public';
-
-    const nodeStream = file.createReadStream();
-    const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
     const headers: Record<string, string> = {
       'Content-Type':
@@ -107,8 +105,26 @@ export class ObjectStorageService {
     if (metadata.size) {
       headers['Content-Length'] = String(metadata.size);
     }
-
-    return new Response(webStream, { headers });
+    const size = Number(metadata.size);
+    headers['Accept-Ranges'] = 'bytes';
+    let start: number | undefined, end: number | undefined;
+    if (range) {
+      const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+      if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(size) || size < 1) {
+        return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}`, 'Accept-Ranges': 'bytes' } });
+      }
+      start = match[1] ? Number(match[1]) : Math.max(0, size - Number(match[2]));
+      end = match[1] && match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start > end || start >= size ||
+          (!match[1] && Number(match[2]) === 0)) {
+        return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}`, 'Accept-Ranges': 'bytes' } });
+      }
+      headers['Content-Range'] = `bytes ${start}-${end}/${size}`;
+      headers['Content-Length'] = String(end - start + 1);
+    }
+    const nodeStream = file.createReadStream(start === undefined ? undefined : { start, end });
+    const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+    return new Response(webStream, { status: range ? 206 : 200, headers });
   }
 
   async getObjectEntityUploadURL(): Promise<string> {

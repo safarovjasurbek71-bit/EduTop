@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { getAuth } from "@clerk/express";
 import { pool } from "@workspace/db";
 import type { Request } from "express";
+import { ObjectStorageService } from "./objectStorage";
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -53,6 +54,8 @@ export const activeCourse = `c.status='published' AND c.listing_expires_at>NOW()
 
 export function courseOutput(row: Record<string, any>) {
   const result = camel(row);
+  result.priceType = result.originalPriceUzs != null && result.originalPriceUzs > result.priceUzs
+    ? "discounted" : result.priceUzs === 0 ? "free" : "paid";
   if (result.status === "published" && new Date(result.listingExpiresAt).getTime() <= Date.now()) result.status = "expired";
   return result;
 }
@@ -94,8 +97,28 @@ export async function ownedImage(value: string | null | undefined, owner: string
   const url = safeUrl(value, true);
   if (url?.startsWith("/")) {
     const path = url.replace(/^\/api\/storage/, "");
-    const { rowCount } = await pool.query("SELECT 1 FROM uploads WHERE object_path=$1 AND owner_id=$2", [path, owner]);
-    if (!rowCount) throw new HttpError(403, "Bu rasm sizga tegishli emas / Нет доступа к изображению");
+    const { rows } = await pool.query("SELECT content_type FROM uploads WHERE object_path=$1 AND owner_id=$2", [path, owner]);
+    if (!rows[0]) throw new HttpError(403, "Bu rasm sizga tegishli emas / Нет доступа к изображению");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(rows[0].content_type)) throw new HttpError(400, "Rasm faylini tanlang / Выберите изображение");
   }
   return url;
+}
+
+export async function ownedVideo(value: string | null | undefined, owner: string) {
+  if (!value) return null;
+  if (!value.startsWith("/api/storage/objects/") && !value.startsWith("/objects/")) {
+    throw new HttpError(400, "Videoni sayt orqali yuklang / Загрузите видео через сайт");
+  }
+  const path = value.replace(/^\/api\/storage/, "");
+  const { rows } = await pool.query("SELECT content_type FROM uploads WHERE object_path=$1 AND owner_id=$2", [path, owner]);
+  if (!rows[0]) throw new HttpError(403, "Bu video sizga tegishli emas / Нет доступа к видео");
+  if (!["video/mp4", "video/webm"].includes(rows[0].content_type)) throw new HttpError(400, "MP4 yoki WebM video tanlang / Выберите видео MP4 или WebM");
+  const file = await new ObjectStorageService().getObjectEntityFile(path);
+  const [metadata] = await file.getMetadata();
+  const size = Number(metadata.size);
+  if (!Number.isFinite(size) || size < 1 || size > 52428800 ||
+      !["video/mp4", "video/webm"].includes(metadata.contentType ?? "")) {
+    throw new HttpError(400, "MP4 yoki WebM video, 50 MB gacha / Видео MP4 или WebM до 50 МБ");
+  }
+  return `/api/storage${path}`;
 }

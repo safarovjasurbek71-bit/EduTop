@@ -6,7 +6,7 @@ import {
   CreateCourseBody, CreateCourseResponse, UpdateCourseParams, UpdateCourseBody,
   UpdateCourseResponse, DeleteCourseParams,
 } from "@workspace/api-zod";
-import { activeCourse, courseOutput, courseSelect, findCourse, HttpError, myTeacher, newId, ownedImage, safeUrl, userId, optionalUserId } from "../lib/edutop";
+import { activeCourse, courseOutput, courseSelect, findCourse, HttpError, myTeacher, newId, ownedImage, ownedVideo, safeUrl, userId, optionalUserId } from "../lib/edutop";
 
 const router: IRouter = Router();
 
@@ -76,10 +76,40 @@ const fields: Record<string, string> = {
   endDate: "end_date", listingExpiresAt: "listing_expires_at", status: "status",
   featured: "featured", cityUz: "city_uz", cityRu: "city_ru", scheduleUz: "schedule_uz",
   scheduleRu: "schedule_ru", paymentUrl: "payment_url",
+  discountPercent: "discount_percent", resourceUrl: "resource_url",
+  videoUrl: "video_url",
 };
 
-async function validateCourse(data: Record<string, any>, owner: string) {
-  if (new Date(data.startDate).getTime() > new Date(data.endDate).getTime()) throw new HttpError(400, "Tugash sanasi boshlanishdan oldin bo‘lmasin / Проверьте даты");
+async function validateCourse(data: Record<string, any>, owner: string, changes: Record<string, any>) {
+  data.titleUz = data.titleUz?.trim();
+  if (!data.titleUz || data.titleUz.length < 3) throw new HttpError(400, "Kurs nomini kiriting / Укажите название курса");
+  data.titleRu = data.titleRu?.trim() || data.titleUz;
+  data.descriptionUz ??= "";
+  data.descriptionRu = data.descriptionRu?.trim() || data.descriptionUz;
+  data.deliveryMode ??= "online";
+  data.priceUzs ??= 0;
+  if (changes.priceType === "free") {
+    data.priceUzs = 0;
+    data.originalPriceUzs = null;
+    data.discountPercent = null;
+  } else if (changes.priceType === "paid") {
+    if (data.priceUzs <= 0) throw new HttpError(400, "Pullik kurs narxini kiriting / Укажите цену платного курса");
+    data.originalPriceUzs = null;
+    data.discountPercent = null;
+  } else if (changes.priceType === "discounted" || changes.discountPercent != null ||
+    ((changes.originalPriceUzs !== undefined || changes.priceUzs !== undefined) && data.discountPercent != null)) {
+    const percent = data.discountPercent;
+    const original = data.originalPriceUzs;
+    if (!Number.isInteger(original) || original <= 0) throw new HttpError(400, "Asl narxni kiriting / Укажите исходную цену");
+    if (!Number.isInteger(percent) || percent < 1 || percent > 100) throw new HttpError(400, "Chegirma foizi 1–100 orasida bo‘lsin / Скидка должна быть от 1 до 100%");
+    data.priceUzs = Math.round(original * (100 - percent) / 100);
+  } else if (data.originalPriceUzs == null) {
+    data.discountPercent = null;
+  }
+  data.startDate ??= null;
+  data.endDate ??= null;
+  data.listingExpiresAt ??= new Date(Date.now() + 90 * 86400000);
+  if (data.startDate && data.endDate && new Date(data.startDate).getTime() > new Date(data.endDate).getTime()) throw new HttpError(400, "Tugash sanasi boshlanishdan oldin bo‘lmasin / Проверьте даты");
   const expiry = new Date(data.listingExpiresAt);
   if (!Number.isFinite(expiry.getTime())) throw new HttpError(400, "Noto‘g‘ri sana / Неверная дата");
   if (data.status !== "draft" && expiry.getTime() <= Date.now()) throw new HttpError(400, "E’lon muddati kelajakda bo‘lishi kerak / Укажите будущую дату");
@@ -89,16 +119,16 @@ async function validateCourse(data: Record<string, any>, owner: string) {
   const { rowCount } = await pool.query("SELECT 1 FROM categories WHERE id=$1", [data.categoryId]);
   if (!rowCount) throw new HttpError(400, "Yo‘nalishni tanlang / Выберите категорию");
   data.paymentUrl = safeUrl(data.paymentUrl);
+  data.resourceUrl = safeUrl(data.resourceUrl);
   data.imageUrl = await ownedImage(data.imageUrl, owner);
-  if (data.deliveryMode !== "online" && !data.cityUz?.trim()) throw new HttpError(400, "Oflayn kurs uchun manzil kerak / Укажите город");
+  data.videoUrl = await ownedVideo(data.videoUrl, owner);
 }
 
 router.post("/courses", async (req, res): Promise<void> => {
   const data = CreateCourseBody.parse(req.body);
   const teacher = await myTeacher(req);
-  if (!teacher.specialization_uz?.trim() || !teacher.bio_uz?.trim()) throw new HttpError(400, "Avval o‘qituvchi profilini to‘ldiring / Сначала заполните профиль");
   const input: Record<string, any> = { ...data, status: data.status ?? "published" };
-  await validateCourse(input, userId(req));
+  await validateCourse(input, userId(req), data);
   const entries = Object.entries(input).filter(([key]) => fields[key]);
   const id = newId();
   const columns = entries.map(([key]) => fields[key]);
@@ -113,7 +143,8 @@ router.patch("/courses/:courseId", async (req, res): Promise<void> => {
   const teacher = await myTeacher(req);
   const old = await findCourse(courseId, teacher.id);
   const input = { ...old, ...data, status: data.status ?? (old.status === "expired" ? "published" : old.status) };
-  await validateCourse(input, userId(req));
+  if (input.status === "published" && old.status === "expired" && !data.listingExpiresAt) input.listingExpiresAt = new Date(Date.now() + 90 * 86400000);
+  await validateCourse(input, userId(req), data);
   const entries = Object.entries(input).filter(([key]) => fields[key]);
   await pool.query(`UPDATE courses SET ${entries.map(([key], i) => `${fields[key]}=$${i + 1}`).join(",")} WHERE id=$${entries.length + 1} AND teacher_id=$${entries.length + 2}`, [...entries.map(([, value]) => value), courseId, teacher.id]);
   res.json(UpdateCourseResponse.parse(await findCourse(courseId, teacher.id)));

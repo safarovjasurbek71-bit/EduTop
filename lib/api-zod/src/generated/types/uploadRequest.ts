@@ -14,8 +14,9 @@ export interface UploadRequest {
      */
   name: string;
   /**
+     * Images up to 10 MB; MP4/WebM videos up to 50 MB.
      * @minimum 1
-     * @maximum 10485760
+     * @maximum 52428800
      */
   size: number;
   contentType: UploadRequestContentType;
