@@ -3,6 +3,8 @@ import pg from "pg";
 import * as schema from "./schema";
 
 const { Pool } = pg;
+// PostgreSQL DATE is a calendar day, not a JavaScript instant.
+pg.types.setTypeParser(1082, (value) => value);
 
 if (!process.env.DATABASE_URL) {
   throw new Error(

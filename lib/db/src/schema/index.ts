@@ -17,4 +17,9 @@
 //   export type InsertPost = z.infer<typeof insertPostSchema>;
 //   export type Post = typeof postsTable.$inferSelect;
 
-export {}
+export * from "./teachers";
+export * from "./categories";
+export * from "./courses";
+export * from "./conversations";
+export * from "./reviews";
+export * from "./uploads";

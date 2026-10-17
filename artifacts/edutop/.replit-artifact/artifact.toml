@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "EduTop"
+description = "EduTop — o‘zbek va rus tillarida ishlaydigan kurs topish va e’lon qilish platformasi. O‘quvchilar kurslarni qidiradi, o‘qituvchilar profillar va kurs e’lonlarini boshqaradi, hamda sayt ichida savol-javob qiladi."
+version = "1.0.0"
+id = "artifacts/edutop"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20057
+
+[services.development]
+run = "pnpm --filter @workspace/edutop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/edutop", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/edutop/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20057"
+BASE_PATH = "/"

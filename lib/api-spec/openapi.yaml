@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: EduTop course discovery, teacher listings, and conversations API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: courses
+    description: Public course discovery and teacher course management
+  - name: teachers
+    description: Teacher profiles and dashboards
+  - name: conversations
+    description: Guest-to-teacher course conversations
+  - name: reviews
+    description: Public course and teacher reviews
+  - name: storage
+    description: Secure image uploads
 paths:
   /healthz:
     get:
@@ -24,7 +34,476 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [courses]
+      summary: List course categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: Search and filter published courses
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: deliveryMode
+          schema: { type: string, enum: [online, offline, hybrid] }
+        - in: query
+          name: priceType
+          schema: { type: string, enum: [free, discounted, paid] }
+        - in: query
+          name: city
+          schema: { type: string }
+        - in: query
+          name: minPrice
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: maxPrice
+          schema: { type: integer, minimum: 0 }
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [relevance, rating, newest, priceAsc, priceDesc]
+            default: relevance
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+      responses:
+        "200":
+          description: Matching courses and pagination metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseList"
+    post:
+      operationId: createCourse
+      tags: [courses]
+      summary: Create a course listing for the signed-in teacher
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseInput"
+      responses:
+        "201":
+          description: Created course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          description: Invalid course data
+        "401":
+          description: Sign-in required
+  /courses/featured:
+    get:
+      operationId: listFeaturedCourses
+      tags: [courses]
+      summary: List featured active courses
+      responses:
+        "200":
+          description: Featured courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+  /courses/{courseId}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get a published course listing
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "404":
+          description: Course not found or expired
+    patch:
+      operationId: updateCourse
+      tags: [courses]
+      summary: Update a course owned by the signed-in teacher
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseUpdate"
+      responses:
+        "200":
+          description: Updated course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "401":
+          description: Sign-in required
+        "404":
+          description: Course not found
+    delete:
+      operationId: deleteCourse
+      tags: [courses]
+      summary: Remove a course owned by the signed-in teacher
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      responses:
+        "204":
+          description: Course removed
+        "401":
+          description: Sign-in required
+        "404":
+          description: Course not found
+  /teachers/{teacherId}:
+    get:
+      operationId: getTeacher
+      tags: [teachers]
+      summary: Get a public teacher profile
+      parameters:
+        - in: path
+          name: teacherId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+        "404":
+          description: Teacher not found
+  /teachers/{teacherId}/courses:
+    get:
+      operationId: listTeacherCourses
+      tags: [teachers]
+      summary: List a teacher's published courses
+      parameters:
+        - in: path
+          name: teacherId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Published courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+  /teachers/me:
+    get:
+      operationId: getMyTeacherProfile
+      tags: [teachers]
+      summary: Get the signed-in teacher profile
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+        "401":
+          description: Sign-in required
+    put:
+      operationId: saveMyTeacherProfile
+      tags: [teachers]
+      summary: Create or update the signed-in teacher profile
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherProfileInput"
+      responses:
+        "200":
+          description: Saved teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+        "401":
+          description: Sign-in required
+  /teachers/me/dashboard:
+    get:
+      operationId: getTeacherDashboard
+      tags: [teachers]
+      summary: Get course, rating, and message summary for the teacher
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Teacher dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherDashboard"
+        "401":
+          description: Sign-in required
+  /teachers/me/courses:
+    get:
+      operationId: listMyCourses
+      tags: [teachers]
+      summary: List all courses owned by the signed-in teacher
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Teacher's courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "401":
+          description: Sign-in required
+  /courses/{courseId}/conversations:
+    post:
+      operationId: startCourseConversation
+      tags: [conversations]
+      summary: Start a guest conversation from a course page
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuestConversationInput"
+      responses:
+        "201":
+          description: Conversation and private return link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuestConversationCreated"
+        "400":
+          description: Invalid message
+        "404":
+          description: Course not found
+        "429":
+          description: Too many requests
+  /guest/conversations/{accessToken}:
+    get:
+      operationId: getGuestConversation
+      tags: [conversations]
+      summary: Retrieve a guest conversation using its private return token
+      parameters:
+        - in: path
+          name: accessToken
+          required: true
+          schema: { type: string, minLength: 40 }
+      responses:
+        "200":
+          description: Guest conversation and messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuestConversation"
+        "404":
+          description: Conversation not found
+    post:
+      operationId: sendGuestMessage
+      tags: [conversations]
+      summary: Add a guest reply using the private return token
+      parameters:
+        - in: path
+          name: accessToken
+          required: true
+          schema: { type: string, minLength: 40 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Saved guest message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationMessage"
+        "404":
+          description: Conversation not found
+        "429":
+          description: Too many requests
+  /teachers/me/conversations:
+    get:
+      operationId: listMyConversations
+      tags: [conversations]
+      summary: List the teacher's conversations across courses
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Teacher conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConversationSummary"
+        "401":
+          description: Sign-in required
+  /teachers/me/conversations/{conversationId}/messages:
+    get:
+      operationId: getTeacherConversation
+      tags: [conversations]
+      summary: Read a conversation belonging to the signed-in teacher
+      security:
+        - ClerkSession: []
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Conversation and messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuestConversation"
+        "401":
+          description: Sign-in required
+        "404":
+          description: Conversation not found
+    post:
+      operationId: replyToConversation
+      tags: [conversations]
+      summary: Reply to a guest from the teacher inbox
+      security:
+        - ClerkSession: []
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Saved teacher reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationMessage"
+        "401":
+          description: Sign-in required
+        "404":
+          description: Conversation not found
+  /courses/{courseId}/reviews:
+    get:
+      operationId: listCourseReviews
+      tags: [reviews]
+      summary: List course reviews and teacher rating details
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createCourseReview
+      tags: [reviews]
+      summary: Submit a named course review
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "404":
+          description: Course not found
+        "429":
+          description: Too many requests
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a secure image upload URL
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+      responses:
+        "200":
+          description: Signed upload URL and object path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "401":
+          description: Sign-in required
 components:
+  parameters:
+    CourseId:
+      in: path
+      name: courseId
+      required: true
+      schema: { type: string }
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +512,310 @@ components:
           type: string
       required:
         - status
+    Category:
+      type: object
+      required: [id, key, nameUz, nameRu, courseCount]
+      properties:
+        id: { type: string }
+        key: { type: string }
+        nameUz: { type: string }
+        nameRu: { type: string }
+        courseCount: { type: integer }
+    TeacherSummary:
+      type: object
+      required: [id, fullNameUz, fullNameRu, rating, ratingCount, verified]
+      properties:
+        id: { type: string }
+        fullNameUz: { type: string }
+        fullNameRu: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        cityUz: { type: ["string", "null"] }
+        cityRu: { type: ["string", "null"] }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        verified: { type: boolean }
+    Certificate:
+      type: object
+      required: [titleUz, titleRu]
+      properties:
+        titleUz: { type: string }
+        titleRu: { type: string }
+        issuer: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+    TeacherProfile:
+      type: object
+      required:
+        - id
+        - fullNameUz
+        - fullNameRu
+        - specializationUz
+        - specializationRu
+        - bioUz
+        - bioRu
+        - experienceYears
+        - certificates
+        - rating
+        - ratingCount
+        - verified
+      properties:
+        id: { type: string }
+        fullNameUz: { type: string }
+        fullNameRu: { type: string }
+        specializationUz: { type: string }
+        specializationRu: { type: string }
+        bioUz: { type: string }
+        bioRu: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        experienceYears: { type: integer }
+        certificates:
+          type: array
+          items: { $ref: "#/components/schemas/Certificate" }
+        phone: { type: ["string", "null"] }
+        telegramUrl: { type: ["string", "null"] }
+        websiteUrl: { type: ["string", "null"] }
+        youtubeUrl: { type: ["string", "null"] }
+        cityUz: { type: ["string", "null"] }
+        cityRu: { type: ["string", "null"] }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        verified: { type: boolean }
+    TeacherProfileInput:
+      type: object
+      required:
+        - fullNameUz
+        - fullNameRu
+        - specializationUz
+        - specializationRu
+        - bioUz
+        - bioRu
+        - experienceYears
+      properties:
+        fullNameUz: { type: string, minLength: 2, maxLength: 120 }
+        fullNameRu: { type: string, minLength: 2, maxLength: 120 }
+        specializationUz: { type: string, minLength: 2, maxLength: 120 }
+        specializationRu: { type: string, minLength: 2, maxLength: 120 }
+        bioUz: { type: string, maxLength: 4000 }
+        bioRu: { type: string, maxLength: 4000 }
+        avatarUrl: { type: ["string", "null"], maxLength: 2000 }
+        experienceYears: { type: integer, minimum: 0, maximum: 70 }
+        certificates:
+          type: array
+          items: { $ref: "#/components/schemas/Certificate" }
+        phone: { type: ["string", "null"], maxLength: 40 }
+        telegramUrl: { type: ["string", "null"], maxLength: 500 }
+        websiteUrl: { type: ["string", "null"], maxLength: 500 }
+        youtubeUrl: { type: ["string", "null"], maxLength: 500 }
+        cityUz: { type: ["string", "null"], maxLength: 120 }
+        cityRu: { type: ["string", "null"], maxLength: 120 }
+    Course:
+      type: object
+      required:
+        - id
+        - titleUz
+        - titleRu
+        - descriptionUz
+        - descriptionRu
+        - categoryId
+        - deliveryMode
+        - priceUzs
+        - originalPriceUzs
+        - imageUrl
+        - startDate
+        - endDate
+        - listingExpiresAt
+        - status
+        - featured
+        - cityUz
+        - cityRu
+        - scheduleUz
+        - scheduleRu
+        - paymentUrl
+        - teacher
+        - createdAt
+      properties:
+        id: { type: string }
+        titleUz: { type: string }
+        titleRu: { type: string }
+        descriptionUz: { type: string }
+        descriptionRu: { type: string }
+        categoryId: { type: string }
+        deliveryMode: { type: string, enum: [online, offline, hybrid] }
+        priceUzs: { type: integer, minimum: 0 }
+        originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        imageUrl: { type: ["string", "null"] }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        listingExpiresAt: { type: string, format: date-time }
+        status: { type: string, enum: [draft, published, expired] }
+        featured: { type: boolean }
+        cityUz: { type: ["string", "null"] }
+        cityRu: { type: ["string", "null"] }
+        scheduleUz: { type: ["string", "null"] }
+        scheduleRu: { type: ["string", "null"] }
+        paymentUrl: { type: ["string", "null"] }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        teacher: { $ref: "#/components/schemas/TeacherSummary" }
+        createdAt: { type: string, format: date-time }
+    CourseList:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Course" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+    CourseInput:
+      type: object
+      required:
+        - titleUz
+        - titleRu
+        - descriptionUz
+        - descriptionRu
+        - categoryId
+        - deliveryMode
+        - priceUzs
+        - startDate
+        - endDate
+        - listingExpiresAt
+      properties:
+        titleUz: { type: string, minLength: 3, maxLength: 180 }
+        titleRu: { type: string, minLength: 3, maxLength: 180 }
+        descriptionUz: { type: string, minLength: 10, maxLength: 8000 }
+        descriptionRu: { type: string, minLength: 10, maxLength: 8000 }
+        categoryId: { type: string }
+        deliveryMode: { type: string, enum: [online, offline, hybrid] }
+        priceUzs: { type: integer, minimum: 0 }
+        originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        imageUrl: { type: ["string", "null"], maxLength: 2000 }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        listingExpiresAt: { type: string, format: date-time }
+        featured: { type: boolean, default: false }
+        cityUz: { type: ["string", "null"], maxLength: 120 }
+        cityRu: { type: ["string", "null"], maxLength: 120 }
+        scheduleUz: { type: ["string", "null"], maxLength: 500 }
+        scheduleRu: { type: ["string", "null"], maxLength: 500 }
+        paymentUrl: { type: ["string", "null"], maxLength: 2000 }
+        status: { type: string, enum: [draft, published] }
+    CourseUpdate:
+      type: object
+      properties:
+        titleUz: { type: string, minLength: 3, maxLength: 180 }
+        titleRu: { type: string, minLength: 3, maxLength: 180 }
+        descriptionUz: { type: string, minLength: 10, maxLength: 8000 }
+        descriptionRu: { type: string, minLength: 10, maxLength: 8000 }
+        categoryId: { type: string }
+        deliveryMode: { type: string, enum: [online, offline, hybrid] }
+        priceUzs: { type: integer, minimum: 0 }
+        originalPriceUzs: { type: ["integer", "null"], minimum: 0 }
+        imageUrl: { type: ["string", "null"], maxLength: 2000 }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        listingExpiresAt: { type: string, format: date-time }
+        featured: { type: boolean }
+        cityUz: { type: ["string", "null"], maxLength: 120 }
+        cityRu: { type: ["string", "null"], maxLength: 120 }
+        scheduleUz: { type: ["string", "null"], maxLength: 500 }
+        scheduleRu: { type: ["string", "null"], maxLength: 500 }
+        paymentUrl: { type: ["string", "null"], maxLength: 2000 }
+        status: { type: string, enum: [draft, published] }
+    TeacherDashboard:
+      type: object
+      required: [activeCourses, draftCourses, expiredCourses, unreadConversations, averageRating, totalReviews]
+      properties:
+        activeCourses: { type: integer }
+        draftCourses: { type: integer }
+        expiredCourses: { type: integer }
+        unreadConversations: { type: integer }
+        averageRating: { type: number }
+        totalReviews: { type: integer }
+    GuestConversationInput:
+      type: object
+      required: [guestName, firstMessage]
+      properties:
+        guestName: { type: string, minLength: 2, maxLength: 120 }
+        firstMessage: { type: string, minLength: 2, maxLength: 4000 }
+    GuestConversationCreated:
+      type: object
+      required: [conversationId, accessToken, returnUrl]
+      properties:
+        conversationId: { type: string }
+        accessToken: { type: string }
+        returnUrl: { type: string }
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1, maxLength: 4000 }
+    ConversationMessage:
+      type: object
+      required: [id, senderType, senderName, content, createdAt]
+      properties:
+        id: { type: string }
+        senderType: { type: string, enum: [guest, teacher] }
+        senderName: { type: string }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+    GuestConversation:
+      type: object
+      required: [id, courseId, courseTitleUz, courseTitleRu, guestName, messages, updatedAt]
+      properties:
+        id: { type: string }
+        courseId: { type: string }
+        courseTitleUz: { type: string }
+        courseTitleRu: { type: string }
+        guestName: { type: string }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/ConversationMessage" }
+        updatedAt: { type: string, format: date-time }
+    ConversationSummary:
+      type: object
+      required: [id, courseId, courseTitleUz, courseTitleRu, guestName, lastMessage, unreadCount, updatedAt]
+      properties:
+        id: { type: string }
+        courseId: { type: string }
+        courseTitleUz: { type: string }
+        courseTitleRu: { type: string }
+        guestName: { type: string }
+        lastMessage: { type: string }
+        unreadCount: { type: integer }
+        updatedAt: { type: string, format: date-time }
+    ReviewInput:
+      type: object
+      required: [reviewerName, stars, comment]
+      properties:
+        reviewerName: { type: string, minLength: 2, maxLength: 120 }
+        stars: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, minLength: 3, maxLength: 2000 }
+    Review:
+      type: object
+      required: [id, reviewerName, stars, comment, createdAt]
+      properties:
+        id: { type: string }
+        reviewerName: { type: string }
+        stars: { type: integer }
+        comment: { type: string }
+        createdAt: { type: string, format: date-time }
+    UploadRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        size: { type: integer, minimum: 1, maximum: 10485760 }
+        contentType: { type: string, enum: [image/jpeg, image/png, image/webp] }
+    UploadResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string }
+        objectPath: { type: string }
+  securitySchemes:
+    ClerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
 
