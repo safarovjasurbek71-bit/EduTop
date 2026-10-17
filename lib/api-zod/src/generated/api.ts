@@ -9,6 +9,12 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Published public pages only; requires the verified publication origin
+ */
+export const GetPublicSitemapResponse = zod.unknown()
+
+
+/**
  * @summary Read the current Telegram browser session and login availability
  */
 export const GetAppSessionResponse = zod.object({

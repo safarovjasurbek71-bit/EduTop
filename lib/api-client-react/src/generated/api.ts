@@ -71,6 +71,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getGetPublicSitemapUrl = () => {
+
+
+
+
+  return `/api/seo/sitemap.xml`
+}
+
+/**
+ * @summary Published public pages only; requires the verified publication origin
+ */
+export const getPublicSitemap = async ( options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getGetPublicSitemapUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicSitemapQueryKey = () => {
+    return [
+    `/api/seo/sitemap.xml`
+    ] as const;
+    }
+
+
+export const getGetPublicSitemapQueryOptions = <TData = Awaited<ReturnType<typeof getPublicSitemap>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicSitemap>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicSitemapQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicSitemap>>> = ({ signal }) => getPublicSitemap({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicSitemap>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicSitemapQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicSitemap>>>
+export type GetPublicSitemapQueryError = ErrorType<void>
+
+
+/**
+ * @summary Published public pages only; requires the verified publication origin
+ */
+
+export function useGetPublicSitemap<TData = Awaited<ReturnType<typeof getPublicSitemap>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicSitemap>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicSitemapQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetAppSessionUrl = () => {
 
 

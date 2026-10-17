@@ -26,3 +26,11 @@ Profil va kurs yaratishda barcha maydonlarni majburiy qilmang. Kurslarni o‘qit
 Bepul kursga e’lon beruvchining Telegram kanali, YouTube yoki boshqa kurs havolasini qo‘shish mumkin. Chegirmali kursda asl narx va chegirma foizi kiritiladi; yakuniy narx avtomatik hisoblanib, asl narx bilan birga e’londa ko‘rsatiladi.
 **Why:** Foydalanuvchi bepul va chegirmali e’lonlar uchun aynan shu tartibni so‘radi.
 **How to apply:** Narx turini aniq tanlatish, bepul kursga havola qo‘shishni oson qilish va chegirma hisobini serverda ham tekshirish kerak.
+
+Kurs e’loniga rasm va, xohlasa, tavsif uchun video yuklash mumkin bo‘lsin; video majburiy emas.
+**Why:** Foydalanuvchi “kurs yaratish rasm, xohlasa video ham yuklasin kurs tavsifida” deb so‘radi.
+**How to apply:** Video bo‘lmasa ham kurs e’lon qilish mumkin bo‘lsin; video e’lonning qo‘shimcha tavsif materiali hisoblanadi.
+
+O‘qituvchi bahosini 5 ballik tizimda ko‘rsating. Foydalanuvchi bahosi va malaka tasdiqlanishini aralashtirmang; sertifikat rasmini yuklashning o‘zi haqiqiyligini isbotlamaydi.
+**Why:** Foydalanuvchi xalqaro amaliyotga asoslangan baholashni so‘radi. Preply malaka belgisini hujjatni qo‘lda tekshirgandan keyin beradi; UNESCO kompetensiya mezonlarini universal sertifikatdan-yulduzga formula deb ko‘rsatish noto‘g‘ri.
+**How to apply:** O‘zboshimcha sertifikat sonidan yulduz qo‘shmang va tekshirilmagan hujjatni tasdiqlangan deb atamang; har qanday yangi malaka bahosi mezonlarini ochiq izohlang.

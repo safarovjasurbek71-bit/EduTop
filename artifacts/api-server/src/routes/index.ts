@@ -6,6 +6,7 @@ import teachersRouter from "./teachers";
 import conversationsRouter from "./conversations";
 import reviewsRouter from "./reviews";
 import storageRouter from "./storage";
+import seoRouter from "./seo";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(teachersRouter);
 router.use(coursesRouter);
 router.use(reviewsRouter);
 router.use(storageRouter);
+router.use(seoRouter);
 
 export default router;

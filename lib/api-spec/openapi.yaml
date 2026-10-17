@@ -21,6 +21,19 @@ tags:
   - name: storage
     description: Secure image uploads
 paths:
+  /seo/sitemap.xml:
+    get:
+      operationId: getPublicSitemap
+      tags: [seo]
+      summary: Published public pages only; requires the verified publication origin
+      responses:
+        "200":
+          description: Sitemap of active courses and their public teacher profiles
+          content:
+            application/xml:
+              schema: { type: string }
+        "503":
+          description: A production origin has not been configured yet
   /auth/session:
     get:
       operationId: getAppSession

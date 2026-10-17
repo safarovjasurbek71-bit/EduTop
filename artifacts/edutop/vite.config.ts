@@ -1,4 +1,5 @@
 import path from 'path';
+import { appendFile } from 'node:fs/promises';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -20,6 +21,16 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const basePath = process.env.BASE_PATH;
+const configuredSiteUrl = process.env.PUBLIC_SITE_URL?.trim();
+let publicSiteUrl = '';
+if (configuredSiteUrl) {
+  const url = new URL(configuredSiteUrl);
+  if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' ||
+      url.search || url.hash || url.hostname.endsWith('.replit.dev') || url.hostname === 'localhost') {
+    throw new Error('PUBLIC_SITE_URL must be the actual published HTTPS website origin, not a preview URL.');
+  }
+  publicSiteUrl = url.origin;
+}
 
 if (!basePath) {
   throw new Error(
@@ -29,7 +40,32 @@ if (!basePath) {
 
 export default defineConfig({
   base: basePath,
+  define: { __EDUTOP_PUBLIC_SITE_URL__: JSON.stringify(publicSiteUrl) },
   plugins: [
+    {
+      name: 'edutop-search-metadata',
+      configureServer(server) {
+        server.middlewares.use((_req, res, next) => {
+          res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+          next();
+        });
+      },
+      transformIndexHtml() {
+        if (!publicSiteUrl) return [];
+        return [
+          { tag: 'link', attrs: { rel: 'canonical', href: `${publicSiteUrl}/` }, injectTo: 'head' },
+          { tag: 'meta', attrs: { property: 'og:url', content: `${publicSiteUrl}/` }, injectTo: 'head' },
+          { tag: 'meta', attrs: { property: 'og:image', content: `${publicSiteUrl}/edutop-logo.png` }, injectTo: 'head' },
+          { tag: 'meta', attrs: { name: 'twitter:image', content: `${publicSiteUrl}/edutop-logo.png` }, injectTo: 'head' },
+        ];
+      },
+      async writeBundle() {
+        if (publicSiteUrl) {
+          await appendFile(path.resolve(import.meta.dirname, 'dist/public/robots.txt'),
+            `\nSitemap: ${publicSiteUrl}/api/seo/sitemap.xml\n`);
+        }
+      },
+    },
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
