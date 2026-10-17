@@ -5,6 +5,16 @@
  * EduTop course discovery, teacher listings, and conversations API
  * OpenAPI spec version: 0.1.0
  */
+export interface AppSession {
+  authenticated: boolean;
+  /** @nullable */
+  userId: string | null;
+  /** @nullable */
+  displayName: string | null;
+  telegramConfigured: boolean;
+  callbackUrl: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -495,6 +505,12 @@ export interface UploadResponse {
   uploadURL: string;
   objectPath: string;
 }
+
+export type CompleteTelegramLoginParams = {
+code?: string;
+state?: string;
+error?: string;
+};
 
 export type ListCoursesParams = {
 q?: string;

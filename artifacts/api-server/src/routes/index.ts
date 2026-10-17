@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import telegramAuthRouter from "./telegram-auth";
 import coursesRouter from "./courses";
 import teachersRouter from "./teachers";
 import conversationsRouter from "./conversations";
@@ -9,6 +10,7 @@ import storageRouter from "./storage";
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(telegramAuthRouter);
 router.use(conversationsRouter);
 router.use(teachersRouter);
 router.use(coursesRouter);

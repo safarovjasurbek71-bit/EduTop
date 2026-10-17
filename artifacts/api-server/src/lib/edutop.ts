@@ -10,9 +10,12 @@ export class HttpError extends Error {
 export const hashToken = (value: string) => createHash("sha256").update(value).digest("hex");
 export const newId = () => randomUUID();
 
+export function optionalUserId(req: Request): string | null {
+  return getAuth(req).userId || req.telegramPrincipal || null;
+}
+
 export function userId(req: Request): string {
-  const auth = getAuth(req);
-  const id = auth.userId;
+  const id = optionalUserId(req);
   if (!id) throw new HttpError(401, "Kirish talab qilinadi / Требуется вход");
   return id;
 }
@@ -22,7 +25,7 @@ export async function myTeacher(req: Request) {
   await pool.query(
     `INSERT INTO teachers (id,clerk_id,full_name_uz,full_name_ru)
      VALUES ($1,$2,$3,$4) ON CONFLICT (clerk_id) DO NOTHING`,
-    [newId(), id, "O‘qituvchi", "Преподаватель"],
+    [newId(), id, req.telegramDisplayName || "O‘qituvchi", req.telegramDisplayName || "Преподаватель"],
   );
   const { rows } = await pool.query("SELECT * FROM teachers WHERE clerk_id=$1", [id]);
   return rows[0];

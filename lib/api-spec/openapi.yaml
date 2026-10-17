@@ -21,6 +21,54 @@ tags:
   - name: storage
     description: Secure image uploads
 paths:
+  /auth/session:
+    get:
+      operationId: getAppSession
+      tags: [auth]
+      summary: Read the current Telegram browser session and login availability
+      responses:
+        "200":
+          description: Current session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppSession"
+  /auth/logout:
+    post:
+      operationId: logoutAppSession
+      tags: [auth]
+      summary: Revoke the current Telegram session
+      responses:
+        "204":
+          description: Session revoked
+  /auth/telegram/start:
+    get:
+      operationId: startTelegramLogin
+      tags: [auth]
+      summary: Start official Telegram OIDC authorization with PKCE
+      responses:
+        "302":
+          description: Redirect to Telegram authorization
+        "503":
+          description: Telegram Login configuration unavailable
+  /auth/telegram/callback:
+    get:
+      operationId: completeTelegramLogin
+      tags: [auth]
+      summary: Verify Telegram authorization and establish a secure browser session
+      parameters:
+        - in: query
+          name: code
+          schema: { type: string }
+        - in: query
+          name: state
+          schema: { type: string }
+        - in: query
+          name: error
+          schema: { type: string }
+      responses:
+        "302":
+          description: Redirect to the dashboard or a sign-in error
   /healthz:
     get:
       operationId: healthCheck
@@ -505,6 +553,15 @@ components:
       required: true
       schema: { type: string }
   schemas:
+    AppSession:
+      type: object
+      required: [authenticated, userId, displayName, telegramConfigured, callbackUrl]
+      properties:
+        authenticated: { type: boolean }
+        userId: { type: [string, "null"] }
+        displayName: { type: [string, "null"] }
+        telegramConfigured: { type: boolean }
+        callbackUrl: { type: string }
     HealthStatus:
       type: object
       properties:

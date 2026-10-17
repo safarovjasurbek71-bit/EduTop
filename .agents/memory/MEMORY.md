@@ -1,1 +1,2 @@
 - [EduTop talablari](edutop-product.md) — Brend nomi, ikki til va mehmon o‘quvchilar uchun kirish qoidalari.
+- [Telegram identifikatsiyasi](telegram-identity.md) — Telegram hisobini Google/email hisobi bilan tasdiqlanmagan ma’lumot orqali birlashtirmang.

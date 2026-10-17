@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './appSession';
 export * from './category';
 export * from './certificate';
+export * from './completeTelegramLoginParams';
 export * from './conversationMessage';
 export * from './conversationMessageSenderType';
 export * from './conversationSummary';

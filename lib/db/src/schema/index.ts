@@ -23,3 +23,4 @@ export * from "./courses";
 export * from "./conversations";
 export * from "./reviews";
 export * from "./uploads";
+export * from "./telegram-auth";

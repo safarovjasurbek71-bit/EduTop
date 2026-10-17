@@ -10,6 +10,14 @@
 .certificate-editor{border:1px solid #dbe5ef;border-radius:14px;padding:18px;margin:14px 0}
 .certificate-image{width:110px;max-height:90px;object-fit:contain;border-radius:6px}
 .pagination{display:flex;align-items:center;gap:12px}
+.auth-options{display:flex;flex-direction:column;gap:16px;width:440px;max-width:100%;align-items:stretch}
+.clerk-page .auth-options{width:440px;max-width:100%;justify-self:center}
+.auth-options>.lang-toggle{align-self:flex-end}
+.telegram-login-button{width:100%;background:#229ed9;color:#fff;min-height:48px;justify-content:center}
+.telegram-login-button:hover{background:#1685bd}
+.telegram-login-block .form-error{margin-top:12px;padding:12px;background:#fff;border-radius:10px}
+.auth-service-warning{padding:10px;text-align:center;background:#fff4df;font-size:13px}
+.auth-service-warning button{margin-left:10px;text-decoration:underline}
 .courses-section>.category-row{margin-bottom:22px}
 .profile-contact{flex-wrap:wrap}
 @plugin "@tailwindcss/typography";

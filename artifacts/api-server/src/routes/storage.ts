@@ -5,9 +5,8 @@ import {
 } from '@workspace/api-zod';
 import { Router, type IRouter, type Request, type Response } from 'express';
 
-import { getAuth } from '@clerk/express';
 import { pool } from '@workspace/db';
-import { throttle } from '../lib/edutop';
+import { throttle, optionalUserId, userId } from '../lib/edutop';
 import {
   ObjectNotFoundError,
   ObjectStorageService,
@@ -17,7 +16,7 @@ const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
 function hasAuthenticatedSession(req: Request): boolean {
-  return Boolean(getAuth(req).userId);
+  return Boolean(optionalUserId(req));
 }
 
 /**
@@ -52,7 +51,7 @@ router.post(
         objectStorageService.normalizeObjectEntityPath(uploadURL);
       await pool.query(
         'INSERT INTO uploads(object_path,owner_id,name,content_type,size) VALUES($1,$2,$3,$4,$5)',
-        [objectPath, getAuth(req).userId, name, contentType, size],
+        [objectPath, userId(req), name, contentType, size],
       );
 
       res.json(

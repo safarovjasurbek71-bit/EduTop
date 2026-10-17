@@ -20,7 +20,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AppSession,
   Category,
+  CompleteTelegramLoginParams,
   ConversationMessage,
   ConversationSummary,
   Course,
@@ -68,6 +70,318 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetAppSessionUrl = () => {
+
+
+
+
+  return `/api/auth/session`
+}
+
+/**
+ * @summary Read the current Telegram browser session and login availability
+ */
+export const getAppSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<AppSession> => {
+
+  return customFetch<AppSession>(getGetAppSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAppSessionQueryKey = () => {
+    return [
+    `/api/auth/session`
+    ] as const;
+    }
+
+
+export const getGetAppSessionQueryOptions = <TData = Awaited<ReturnType<typeof getAppSession>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAppSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAppSessionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAppSession>>> = ({ signal }) => getAppSession({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAppSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAppSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getAppSession>>>
+export type GetAppSessionQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Read the current Telegram browser session and login availability
+ */
+
+export function useGetAppSession<TData = Awaited<ReturnType<typeof getAppSession>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAppSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAppSessionQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getLogoutAppSessionUrl = () => {
+
+
+
+
+  return `/api/auth/logout`
+}
+
+/**
+ * @summary Revoke the current Telegram session
+ */
+export const logoutAppSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getLogoutAppSessionUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLogoutAppSessionMutationKey = () => ['logoutAppSession'] as const;
+
+export const getLogoutAppSessionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAppSession>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutAppSession>>, TError,void, TContext> => {
+
+const mutationKey = getLogoutAppSessionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutAppSession>>, void> = () => {
+
+
+          return  logoutAppSession(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutAppSessionMutationResult = NonNullable<Awaited<ReturnType<typeof logoutAppSession>>>
+
+    export type LogoutAppSessionMutationError = ErrorType<unknown>
+
+
+    /**
+ * @summary Revoke the current Telegram session
+ */
+export const useLogoutAppSession = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutAppSession>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logoutAppSession>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutAppSessionMutationOptions(options));
+    }
+
+export const getStartTelegramLoginUrl = () => {
+
+
+
+
+  return `/api/auth/telegram/start`
+}
+
+/**
+ * @summary Start official Telegram OIDC authorization with PKCE
+ */
+export const startTelegramLogin = async ( options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getStartTelegramLoginUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStartTelegramLoginQueryKey = () => {
+    return [
+    `/api/auth/telegram/start`
+    ] as const;
+    }
+
+
+export const getStartTelegramLoginQueryOptions = <TData = Awaited<ReturnType<typeof startTelegramLogin>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof startTelegramLogin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStartTelegramLoginQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof startTelegramLogin>>> = ({ signal }) => startTelegramLogin({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof startTelegramLogin>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type StartTelegramLoginQueryResult = NonNullable<Awaited<ReturnType<typeof startTelegramLogin>>>
+export type StartTelegramLoginQueryError = ErrorType<void>
+
+
+/**
+ * @summary Start official Telegram OIDC authorization with PKCE
+ */
+
+export function useStartTelegramLogin<TData = Awaited<ReturnType<typeof startTelegramLogin>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof startTelegramLogin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getStartTelegramLoginQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCompleteTelegramLoginUrl = (params?: CompleteTelegramLoginParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/auth/telegram/callback?${stringifiedParams}` : `/api/auth/telegram/callback`
+}
+
+/**
+ * @summary Verify Telegram authorization and establish a secure browser session
+ */
+export const completeTelegramLogin = async (params?: CompleteTelegramLoginParams, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getCompleteTelegramLoginUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompleteTelegramLoginQueryKey = (params?: CompleteTelegramLoginParams,) => {
+    return [
+    `/api/auth/telegram/callback`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getCompleteTelegramLoginQueryOptions = <TData = Awaited<ReturnType<typeof completeTelegramLogin>>, TError = ErrorType<void>>(params?: CompleteTelegramLoginParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof completeTelegramLogin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCompleteTelegramLoginQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof completeTelegramLogin>>> = ({ signal }) => completeTelegramLogin(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof completeTelegramLogin>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type CompleteTelegramLoginQueryResult = NonNullable<Awaited<ReturnType<typeof completeTelegramLogin>>>
+export type CompleteTelegramLoginQueryError = ErrorType<void>
+
+
+/**
+ * @summary Verify Telegram authorization and establish a secure browser session
+ */
+
+export function useCompleteTelegramLogin<TData = Awaited<ReturnType<typeof completeTelegramLogin>>, TError = ErrorType<void>>(
+ params?: CompleteTelegramLoginParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof completeTelegramLogin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getCompleteTelegramLoginQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getHealthCheckUrl = () => {
 

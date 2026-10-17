@@ -9,6 +9,42 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Read the current Telegram browser session and login availability
+ */
+export const GetAppSessionResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "userId": zod.string().nullable(),
+  "displayName": zod.string().nullable(),
+  "telegramConfigured": zod.boolean(),
+  "callbackUrl": zod.string()
+})
+
+
+/**
+ * @summary Revoke the current Telegram session
+ */
+export const LogoutAppSessionResponse = zod.void()
+
+
+/**
+ * @summary Start official Telegram OIDC authorization with PKCE
+ */
+export const StartTelegramLoginResponse = zod.void()
+
+
+/**
+ * @summary Verify Telegram authorization and establish a secure browser session
+ */
+export const CompleteTelegramLoginQueryParams = zod.object({
+  "code": zod.coerce.string().optional(),
+  "state": zod.coerce.string().optional(),
+  "error": zod.coerce.string().optional()
+})
+
+export const CompleteTelegramLoginResponse = zod.void()
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

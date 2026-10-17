@@ -8,6 +8,8 @@ import { publishableKeyFromHost } from "@clerk/shared/keys";
 import { CLERK_PROXY_PATH, clerkProxyMiddleware, getClerkProxyHost } from "./middlewares/clerkProxyMiddleware";
 import { HttpError } from "./lib/edutop";
 import type { ErrorRequestHandler } from "express";
+import cookieParser from "cookie-parser";
+import { telegramSessionMiddleware } from "./lib/telegram-session";
 
 const app: Express = express();
 app.set("trust proxy", 1);
@@ -51,9 +53,11 @@ app.use("/api", (req, res, next) => {
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(clerkMiddleware((req) => ({
   publishableKey: publishableKeyFromHost(getClerkProxyHost(req) ?? "", process.env.CLERK_PUBLISHABLE_KEY),
 })));
+app.use("/api", telegramSessionMiddleware);
 app.use((_req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");

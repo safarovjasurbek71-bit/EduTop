@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { getAuth } from "@clerk/express";
 import { pool } from "@workspace/db";
 import {
   ListCategoriesResponse, ListCoursesQueryParams, ListCoursesResponse,
@@ -7,7 +6,7 @@ import {
   CreateCourseBody, CreateCourseResponse, UpdateCourseParams, UpdateCourseBody,
   UpdateCourseResponse, DeleteCourseParams,
 } from "@workspace/api-zod";
-import { activeCourse, courseOutput, courseSelect, findCourse, HttpError, myTeacher, newId, ownedImage, safeUrl, userId } from "../lib/edutop";
+import { activeCourse, courseOutput, courseSelect, findCourse, HttpError, myTeacher, newId, ownedImage, safeUrl, userId, optionalUserId } from "../lib/edutop";
 
 const router: IRouter = Router();
 
@@ -63,7 +62,7 @@ router.get("/courses/:courseId", async (req, res): Promise<void> => {
   let course;
   try { course = await findCourse(courseId); }
   catch (error) {
-    if (!(error instanceof HttpError) || !getAuth(req).userId) throw error;
+    if (!(error instanceof HttpError) || !optionalUserId(req)) throw error;
     const teacher = await myTeacher(req);
     course = await findCourse(courseId, teacher.id);
   }

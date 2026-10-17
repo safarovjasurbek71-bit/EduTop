@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode, type FormEvent, type ChangeEvent } from 'react';
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-import { ClerkProvider, Show, SignIn, SignUp, useClerk } from '@clerk/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ClerkProvider, SignIn, SignUp } from '@clerk/react';
+import { AppAuthProvider, AuthVisibility as Show, AppLogoutButton, TelegramLoginButton } from '@/components/app-auth';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { ruRU } from '@clerk/localizations';
@@ -94,7 +95,7 @@ function Header({ lang, toggle }: { lang: 'uz'|'ru'; toggle:()=>void }) {
     <Show when="signed-in"><Link href="/dashboard" data-testid="link-dashboard">{tr('Kabinet','Кабинет',lang)}</Link><Link href="/messages" data-testid="link-messages">{tr('Xabarlar','Сообщения',lang)}</Link></Show>
   </nav><div className="nav-actions"><LangButton lang={lang} toggle={toggle}/><Show when="signed-out"><Link href="/sign-in" className="signin-link" data-testid="link-sign-in">{tr('Kirish','Войти',lang)}</Link><Link href="/sign-up" className="button button-primary nav-cta" data-testid="link-sign-up">{tr('Boshlash','Начать',lang)}</Link></Show><Show when="signed-in"><LogoutControl lang={lang}/></Show><button className="mobile-menu" onClick={()=>setOpen(v=>!v)} aria-label="Menyu / Меню" data-testid="button-menu"><Menu size={21}/></button></div></div></header>;
 }
-function LogoutControl({ lang }: {lang:'uz'|'ru'}) { const {signOut}=useClerk(); return <button className="icon-btn" onClick={()=>signOut({redirectUrl:basePath||'/'})} data-testid="button-sign-out" aria-label={tr('Chiqish','Выйти',lang)}><LogOut size={17}/></button>; }
+function LogoutControl({ lang }: {lang:'uz'|'ru'}) { return <AppLogoutButton lang={lang}/>; }
 function Footer({lang}:{lang:'uz'|'ru'}) { return <footer className="footer"><div className="footer-inner"><Brand/><span>{tr('O‘zingizga mos kursni toping.','Найдите курс для себя.',lang)}</span><small>© EduTop · {new Date().getFullYear()}</small></div></footer>; }
 function Shell({children, lang, toggle}:{children:ReactNode;lang:'uz'|'ru';toggle:()=>void}) { return <><Header lang={lang} toggle={toggle}/>{children}<Footer lang={lang}/></>; }
 function SkeletonCards() { return <div className="course-grid">{[1,2,3].map(i=><div className="skeleton-card" key={i}><div/><b/><span/><span/></div>)}</div>; }
@@ -261,9 +262,12 @@ function GuestChatPage({lang,toggle}:{lang:'uz'|'ru';toggle:()=>void}) {
  const submit=(e:FormEvent)=>{e.preventDefault();if(!content.trim())return;send.mutate({accessToken,data:{content:content.trim()}},{onSuccess:()=>{setContent('');chat.refetch()},onError:()=>setError(tr('Xabar yuborilmadi.','Не удалось отправить сообщение.',lang))})};
  return <Shell lang={lang} toggle={toggle}><main className="guest-chat-page page-container"><Link href="/" className="back-link" data-testid="link-guest-home"><ChevronLeft/>{tr('Kurslarni ko‘rish','К курсам',lang)}</Link><div className="guest-chat-wrap">{chat.isLoading?<div className="detail-skeleton"/>:chat.isError||!chat.data?<ErrorBox retry={()=>chat.refetch()} lang={lang}/>:<section className="chat-panel"><header className="chat-header"><div className="conversation-avatar">{chat.data.guestName.slice(0,1)}</div><span><b>{chat.data.guestName}</b><small>{lang==='uz'?chat.data.courseTitleUz:chat.data.courseTitleRu}</small></span><span className="guest-safe"><ShieldCheck size={15}/>{tr('Xavfsiz suhbat','Безопасный чат',lang)}</span></header><div className="guest-intro">{tr('O‘qituvchi bilan suhbat shu yerda davom etadi. Havolani saqlab qo‘ying.','Переписка с преподавателем будет здесь. Сохраните ссылку для возврата.',lang)}</div><div className="chat-messages">{chat.data.messages.map(m=><div className={`message-bubble ${m.senderType==='guest'?'mine':''}`} key={m.id} data-testid={`guest-message-${m.id}`}><small>{m.senderName}</small><p>{m.content}</p><time>{new Date(m.createdAt).toLocaleString()}</time></div>)}</div><form onSubmit={submit} className="chat-compose"><textarea required maxLength={4000} value={content} onChange={e=>setContent(e.target.value)} placeholder={tr('Xabar yozing…','Напишите сообщение…',lang)} data-testid="input-guest-reply"/>{error&&<p className="form-error">{error}</p>}<button disabled={send.isPending} className="button button-primary" data-testid="button-guest-send"><Send size={16}/>{send.isPending?tr('Yuborilmoqda…','Отправка…',lang):tr('Yuborish','Отправить',lang)}</button></form></section>}</div></main></Shell>;
 }
-function SignInPage() { return <div className="clerk-page"><div className="clerk-brand"><Brand/><span>EduTop</span><p>O‘rganish uchun o‘z yo‘lingizni toping.<br/>Найдите свой путь к знаниям.</p></div><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}/></div>; }
-function SignUpPage() { return <div className="clerk-page"><div className="clerk-brand"><Brand/><span>EduTop</span><p>Bilimingizga yangi sahifa oching.<br/>Откройте новую страницу знаний.</p></div><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`}/></div>; }
-function ClerkCacheClear() { const {addListener}=useClerk();const qc=useQueryClient();const prev=useMemo(()=>({id:undefined as string|null|undefined}),[]);useEffect(()=>addListener(({user})=>{const id=user?.id??null;if(prev.id!==undefined&&prev.id!==id)qc.clear();prev.id=id}),[addListener,qc,prev]);return null; }
+function SignInPage({lang,toggle}:{lang:'uz'|'ru';toggle:()=>void}) {
+  return <div className="clerk-page"><div className="clerk-brand"><Brand/><span>EduTop</span><p>{tr('O‘rganish uchun o‘z yo‘lingizni toping.','Найдите свой путь к знаниям.',lang)}</p></div><div className="auth-options"><LangButton lang={lang} toggle={toggle}/><Show when="signed-out"><TelegramLoginButton lang={lang}/><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}/></Show><Show when="signed-in"><Link className="button button-primary" href="/dashboard">{tr('Kabinetga o‘tish','Перейти в кабинет',lang)}</Link></Show></div></div>;
+}
+function SignUpPage({lang,toggle}:{lang:'uz'|'ru';toggle:()=>void}) {
+  return <div className="clerk-page"><div className="clerk-brand"><Brand/><span>EduTop</span><p>{tr('Bilimingizga yangi sahifa oching.','Откройте новую страницу знаний.',lang)}</p></div><div className="auth-options"><LangButton lang={lang} toggle={toggle}/><Show when="signed-out"><TelegramLoginButton lang={lang}/><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`}/></Show><Show when="signed-in"><Link className="button button-primary" href="/dashboard">{tr('Kabinetga o‘tish','Перейти в кабинет',lang)}</Link></Show></div></div>;
+}
 function RouterContent({lang,toggle}:{lang:'uz'|'ru';toggle:()=>void}) {
  const [location]=useLocation();
  useEffect(()=>{
@@ -276,7 +280,7 @@ function RouterContent({lang,toggle}:{lang:'uz'|'ru';toggle:()=>void}) {
    <Route path="/" component={()=> <HomePage lang={lang} toggle={toggle}/>}/>
    <Route path="/courses/:courseId" component={()=> <CoursePage lang={lang} toggle={toggle}/>}/>
    <Route path="/teachers/:teacherId" component={()=> <TeacherPage lang={lang} toggle={toggle}/>}/>
-   <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>
+   <Route path="/sign-in/*?" component={()=> <SignInPage lang={lang} toggle={toggle}/>}/><Route path="/sign-up/*?" component={()=> <SignUpPage lang={lang} toggle={toggle}/>}/>
    <Route path="/publish" component={()=> <PublishPage lang={lang} toggle={toggle}/>}/>
    <Route path="/dashboard" component={()=> <DashboardPage lang={lang} toggle={toggle}/>}/>
    <Route path="/messages" component={()=> <MessagesPage lang={lang} toggle={toggle}/>}/>
@@ -293,7 +297,7 @@ function ClerkRoot() {
     localization={lang==='ru'?ruRU:uzLocalization}
     signInFallbackRedirectUrl={`${basePath}/dashboard`} signUpFallbackRedirectUrl={`${basePath}/publish`}
    routerPush={to=>setLocation(stripBase(to))} routerReplace={to=>setLocation(stripBase(to),{replace:true})}>
-    <ClerkCacheClear/><RouterContent lang={lang} toggle={toggle}/>
+    <AppAuthProvider><RouterContent lang={lang} toggle={toggle}/></AppAuthProvider>
  </ClerkProvider>;
 }
 function App() {
