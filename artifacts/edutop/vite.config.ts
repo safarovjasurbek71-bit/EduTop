@@ -1,5 +1,5 @@
 import path from 'path';
-import { appendFile } from 'node:fs/promises';
+import { appendFile, writeFile } from 'node:fs/promises';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -31,6 +31,8 @@ if (configuredSiteUrl) {
   }
   publicSiteUrl = url.origin;
 }
+const sitemapIndex = () => `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>${publicSiteUrl}/api/seo/sitemap.xml</loc></sitemap></sitemapindex>`;
 
 if (!basePath) {
   throw new Error(
@@ -47,6 +49,11 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((_req, res, next) => {
           res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+          if (publicSiteUrl && _req.url?.split('?')[0] === '/sitemap.xml') {
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+            res.end(sitemapIndex());
+            return;
+          }
           next();
         });
       },
@@ -61,8 +68,11 @@ export default defineConfig({
       },
       async writeBundle() {
         if (publicSiteUrl) {
-          await appendFile(path.resolve(import.meta.dirname, 'dist/public/robots.txt'),
-            `\nSitemap: ${publicSiteUrl}/api/seo/sitemap.xml\n`);
+          await Promise.all([
+            appendFile(path.resolve(import.meta.dirname, 'dist/public/robots.txt'),
+              `\nSitemap: ${publicSiteUrl}/sitemap.xml\n`),
+            writeFile(path.resolve(import.meta.dirname, 'dist/public/sitemap.xml'), sitemapIndex(), 'utf8'),
+          ]);
         }
       },
     },

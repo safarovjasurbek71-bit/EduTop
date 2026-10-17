@@ -1,3 +1,4 @@
 - [EduTop talablari](edutop-product.md) — Brend, uch til, ixtiyoriy maydonlar, turli sohalar va mehmon o‘quvchilar uchun kirish qoidalari.
 - [Telegram identifikatsiyasi](telegram-identity.md) — Telegram hisobini Google/email hisobi bilan tasdiqlanmagan ma’lumot orqali birlashtirmang.
 - [Preview muhiti](preview-quirks.md) — Eski Vite jarayoni portni band qilishi yoki optimallashtirilgan React keshi yangilanmay qolishi mumkin.
+- [SEO va nashr](seo-publication.md) — Shaxsiy domen shart emas; Google renderi uchun ommaviy API ma’lumotlarini yalpi bloklamang.

@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /
-Allow: /api/seo/sitemap.xml
-Disallow: /api/
+Disallow: /api/teachers/me
+Disallow: /api/auth/telegram/
+Disallow: /api/auth/logout
 Disallow: /guest-chat/
 Disallow: /messages
 Disallow: /dashboard
