@@ -80,7 +80,7 @@ const fields: Record<string, string> = {
 };
 
 async function validateCourse(data: Record<string, any>, owner: string) {
-  if (data.startDate > data.endDate) throw new HttpError(400, "Tugash sanasi boshlanishdan oldin bo‘lmasin / Проверьте даты");
+  if (new Date(data.startDate).getTime() > new Date(data.endDate).getTime()) throw new HttpError(400, "Tugash sanasi boshlanishdan oldin bo‘lmasin / Проверьте даты");
   const expiry = new Date(data.listingExpiresAt);
   if (!Number.isFinite(expiry.getTime())) throw new HttpError(400, "Noto‘g‘ri sana / Неверная дата");
   if (data.status !== "draft" && expiry.getTime() <= Date.now()) throw new HttpError(400, "E’lon muddati kelajakda bo‘lishi kerak / Укажите будущую дату");

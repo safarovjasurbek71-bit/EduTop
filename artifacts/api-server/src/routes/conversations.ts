@@ -20,7 +20,7 @@ router.post("/courses/:courseId/conversations", async (req, res): Promise<void> 
   await throttle(req, "new-conversation", 10, 60);
   const course = await findCourse(courseId);
   const owner = await pool.query("SELECT clerk_id FROM teachers WHERE id=$1", [course.teacher.id]);
-  if (!owner.rows[0]?.clerk_id) throw new HttpError(409, "Bu namuna e’lon. Haqiqiy o‘qituvchining e’lonidan yozing / Это демонстрационное объявление");
+  if (!owner.rows[0]?.clerk_id) throw new HttpError(409, "O‘qituvchi hisobi faol emas / Аккаунт преподавателя неактивен");
   const token = randomBytes(32).toString("hex"), id = newId();
   const client = await pool.connect();
   try {

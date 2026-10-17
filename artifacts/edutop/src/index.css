@@ -3,6 +3,15 @@
 @import 'tailwindcss';
 @import '@clerk/themes/shadcn.css';
 @import 'tw-animate-css';
+.teacher-media-fields{margin:24px 0;padding-top:20px;border-top:1px solid #dbe5ef}
+.media-field{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+.media-field>strong{min-width:140px;font-size:14px}
+.media-preview{width:88px;height:76px;object-fit:cover;border-radius:10px;border:1px solid #dbe5ef}
+.certificate-editor{border:1px solid #dbe5ef;border-radius:14px;padding:18px;margin:14px 0}
+.certificate-image{width:110px;max-height:90px;object-fit:contain;border-radius:6px}
+.pagination{display:flex;align-items:center;gap:12px}
+.courses-section>.category-row{margin-bottom:22px}
+.profile-contact{flex-wrap:wrap}
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 

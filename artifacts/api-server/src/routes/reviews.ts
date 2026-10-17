@@ -20,7 +20,7 @@ router.post("/courses/:courseId/reviews", async (req, res): Promise<void> => {
   await throttle(req, "review", 5, 1440);
   const course = await findCourse(courseId);
   const owner = await pool.query("SELECT clerk_id FROM teachers WHERE id=$1", [course.teacher.id]);
-  if (!owner.rows[0]?.clerk_id) throw new HttpError(409, "Namuna kursni baholab bo‘lmaydi / Нельзя оценить демонстрационный курс");
+  if (!owner.rows[0]?.clerk_id) throw new HttpError(409, "O‘qituvchi hisobi faol emas / Аккаунт преподавателя неактивен");
   const { rows } = await pool.query(`INSERT INTO reviews(id,course_id,teacher_id,reviewer_name,stars,comment,visitor_hash)
     VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(course_id,visitor_hash) DO NOTHING
     RETURNING id,reviewer_name,stars,comment,created_at`,

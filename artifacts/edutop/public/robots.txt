@@ -1,2 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /guest-chat/
+Disallow: /messages
+Disallow: /dashboard
+Disallow: /publish
+Disallow: /sign-in
+Disallow: /sign-up
